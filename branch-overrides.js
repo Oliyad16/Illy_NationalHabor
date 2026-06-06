@@ -304,16 +304,48 @@
     });
   }
 
-  function setupCartStub() {
-    var count = 0;
+  // Shared pickup cart, written straight to localStorage so the homepage and the
+  // /pages/* store all read the same cart. Keep this key in sync with pages/branch.js.
+  var CART_KEY = "illyBranchCart";
+  // Map homepage product SKUs to the SKUs our branch catalog actually carries.
+  var SKU_ALIAS = { "60588": "60383", "25403": "25404", "A136ST": "8837ST" };
 
-    function updateCartCount() {
-      document.querySelectorAll(".cc-minicart__quantity").forEach(function (badge) {
-        badge.classList.add("static-cart-count");
-        badge.classList.remove("d-none");
-        badge.textContent = String(count);
-      });
-    }
+  function readCart() {
+    try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function cartCount() {
+    var c = readCart(), n = 0;
+    Object.keys(c).forEach(function (k) { n += c[k]; });
+    return n;
+  }
+
+  function updateCartCount() {
+    var count = cartCount();
+    document.querySelectorAll(".cc-minicart__quantity").forEach(function (badge) {
+      badge.classList.add("static-cart-count");
+      badge.classList.remove("d-none");
+      badge.textContent = String(count);
+    });
+    // Make the header cart icon link to our pickup cart page.
+    document.querySelectorAll(".minicart-link, a.minicart-link, [class*='minicart'] a").forEach(function (a) {
+      if (a.tagName === "A") { a.setAttribute("href", "pages/cart.html"); }
+    });
+  }
+
+  function skuFromControl(control) {
+    var pid = control.getAttribute("data-pid");
+    if (pid) { return SKU_ALIAS[pid] || pid; }
+    // Fall back to a SKU in the nearest product link.
+    var tile = control.closest(".cc-productTile") || control.closest("[class*='productTile']") || control.parentElement;
+    var link = tile && tile.querySelector("a[href*='.html']");
+    var m = link && (link.getAttribute("href") || "").match(/\/([A-Z0-9]+)\.html/i);
+    if (m) { return SKU_ALIAS[m[1]] || m[1]; }
+    return null;
+  }
+
+  function setupCartStub() {
+    updateCartCount();
 
     document.querySelectorAll("button, a").forEach(function (control) {
       var text = (control.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
@@ -329,9 +361,17 @@
       control.dataset.staticCartHandled = "true";
       control.addEventListener("click", function (event) {
         event.preventDefault();
-        count += 1;
+        var sku = skuFromControl(control);
+        if (!sku) {
+          showToast("Browse our shop to add items for pickup.");
+          window.setTimeout(function () { window.location.href = "pages/shop.html"; }, 900);
+          return;
+        }
+        var c = readCart();
+        c[sku] = (c[sku] || 0) + 1;
+        localStorage.setItem(CART_KEY, JSON.stringify(c));
         updateCartCount();
-        showToast("Added to the static preview cart.");
+        showToast("Added to your pickup cart. View it any time from the cart icon.");
       });
     });
   }
