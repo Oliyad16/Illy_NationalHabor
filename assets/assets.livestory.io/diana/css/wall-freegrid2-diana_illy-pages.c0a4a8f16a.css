@@ -1,0 +1,18 @@
+.fpls-wall-container .fpls-element,
+.fpls-wall-freegrid2-dianailly-pages .fpls-element {
+  transition: none;
+}
+.fpls-wall-container .fpls-element.scrolltab table,
+.fpls-wall-freegrid2-dianailly-pages .fpls-element.scrolltab table {
+  width: auto !important;
+}
+.fpls-wall-container .fpls-element.scrolltab td,
+.fpls-wall-freegrid2-dianailly-pages .fpls-element.scrolltab td {
+  white-space: nowrap;
+  min-width: 80px;
+}
+.fpls-wall-container .fpls-element.scrolltab .fpls-box-text,
+.fpls-wall-freegrid2-dianailly-pages .fpls-element.scrolltab .fpls-box-text {
+  overflow-x: auto;
+  padding-bottom: 15px;
+}

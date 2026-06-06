@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shop — illy Caffè National Harbor</title>
+<meta name="description" content="Browse illy coffee and espresso machines and order online for pickup at our National Harbor store.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="branch.css">
+</head>
+<body>
+<div data-chrome-header></div>
+
+<main class="bx-wrap">
+  <nav class="bx-breadcrumb"><a href="index.html">Home</a> / <span id="crumb">Shop</span></nav>
+  <div class="bx-pagehead">
+    <h1 id="page-title">Shop</h1>
+    <p>Browse what we carry at the National Harbor store. Add items to your pickup cart and collect them in person — no shipping, no subscription, just order and grab.</p>
+  </div>
+
+  <div class="bx-pickup">☕ <strong>Order online, pick up in store.</strong>&nbsp;Ready when you arrive at 165 Waterfront Street, National Harbor.</div>
+
+  <div style="margin:0 0 24px; display:flex; gap:10px; flex-wrap:wrap" id="filters"></div>
+
+  <div class="bx-grid" id="grid"></div>
+</main>
+
+<div data-chrome-footer></div>
+
+<script src="../branch-config.js"></script>
+<script src="catalog.js"></script>
+<script src="branch.js"></script>
+<script>
+(function () {
+  var B = window.ILLY_BRANCH;
+  var params = new URLSearchParams(location.search);
+  var cat = params.get("cat") || "all";
+
+  var titles = { all: "Shop All", coffee: "Coffee", machines: "Coffee Machines" };
+  document.getElementById("page-title").textContent = titles[cat] || "Shop";
+  document.getElementById("crumb").textContent = titles[cat] || "Shop";
+  document.title = (titles[cat] || "Shop") + " — illy Caffè National Harbor";
+  B.renderChrome(cat === "machines" ? "Machines" : cat === "coffee" ? "Coffee" : "Shop");
+
+  // Filters
+  var fhost = document.getElementById("filters");
+  [["all","All"],["coffee","Coffee"],["machines","Machines"]].forEach(function (f) {
+    var a = document.createElement("a");
+    a.href = "shop.html?cat=" + f[0];
+    a.className = "bx-btn " + (cat === f[0] ? "" : "bx-btn--ghost");
+    a.style.padding = "9px 18px";
+    a.textContent = f[1];
+    fhost.appendChild(a);
+  });
+
+  // Grid
+  var grid = document.getElementById("grid");
+  var items = B.products.filter(function (p) { return cat === "all" || p.category === cat; });
+  grid.innerHTML = items.map(function (p) {
+    return '' +
+      '<article class="bx-card">' +
+        '<a class="bx-card__imgwrap" href="product.html?id=' + p.id + '">' +
+          '<img src="' + p.img + '" alt="' + p.name + '" loading="lazy">' +
+        '</a>' +
+        '<div class="bx-card__body">' +
+          (p.tag ? '<span class="bx-tag">' + p.tag + '</span>' : '') +
+          '<h2 class="bx-card__name"><a href="product.html?id=' + p.id + '">' + p.name + '</a></h2>' +
+          '<p class="bx-card__price">' + B.money(p.price) + '</p>' +
+          '<div class="bx-card__actions">' +
+            '<button class="bx-btn bx-btn--full" data-add="' + p.id + '">Add to pickup cart</button>' +
+          '</div>' +
+        '</div>' +
+      '</article>';
+  }).join('');
+
+  grid.addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-add]");
+    if (!btn) return;
+    B.cart.add(btn.getAttribute("data-add"), 1);
+    var p = B.findProduct(btn.getAttribute("data-add"));
+    B.toast("Added “" + p.name.split(" — ")[0] + "” to your pickup cart.");
+  });
+})();
+</script>
+</body>
+</html>

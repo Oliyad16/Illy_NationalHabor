@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reserve for Pickup — illy Caffè National Harbor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="branch.css">
+</head>
+<body>
+<div data-chrome-header></div>
+
+<main class="bx-wrap">
+  <nav class="bx-breadcrumb"><a href="index.html">Home</a> / <a href="cart.html">Cart</a> / <span>Pickup</span></nav>
+  <div id="pickup-root"></div>
+</main>
+
+<div data-chrome-footer></div>
+
+<script src="../branch-config.js"></script>
+<script src="catalog.js"></script>
+<script src="branch.js"></script>
+<script>
+(function () {
+  var B = window.ILLY_BRANCH, store = window.ILLY_BRANCH.store || {};
+  B.renderChrome("Shop");
+  var root = document.getElementById("pickup-root");
+  var items = B.cart.items();
+
+  if (!items.length) {
+    root.innerHTML = '<div class="bx-empty"><p>Your pickup cart is empty.</p><a class="bx-btn" href="shop.html">Start browsing</a></div>';
+    return;
+  }
+
+  var summary = items.map(function (it) {
+    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e7ded6;font-size:14px"><span>' + it.qty + ' × ' + it.product.name.split(" — ")[0] + '</span><strong>' + B.money(it.product.price * it.qty) + '</strong></div>';
+  }).join('');
+
+  root.innerHTML =
+    '<div class="bx-pagehead"><h1>Reserve for in-store pickup</h1>' +
+    '<p>Tell us who’s picking up. We’ll hold your order at ' + (store.name || 'our store') + '. Payment is collected when you arrive.</p></div>' +
+    '<div class="bx-pdp" style="align-items:start">' +
+      '<form id="pickup-form" style="display:flex;flex-direction:column;gap:16px">' +
+        '<label style="font-weight:700;font-size:14px">Name<br><input required name="name" style="width:100%;margin-top:6px;padding:12px;border:1px solid #e7ded6;border-radius:6px;font:inherit"></label>' +
+        '<label style="font-weight:700;font-size:14px">Phone<br><input required name="phone" type="tel" style="width:100%;margin-top:6px;padding:12px;border:1px solid #e7ded6;border-radius:6px;font:inherit"></label>' +
+        '<label style="font-weight:700;font-size:14px">Pickup time<br><input name="time" type="text" placeholder="e.g. Today around 5 PM" style="width:100%;margin-top:6px;padding:12px;border:1px solid #e7ded6;border-radius:6px;font:inherit"></label>' +
+        '<button class="bx-btn bx-btn--lg" type="submit">Confirm reservation</button>' +
+        '<p style="font-size:13px;color:#8a7a6e;margin:0">This is a local store demo — reservations are held in your browser, not sent anywhere external.</p>' +
+      '</form>' +
+      '<aside class="bx-store__card">' +
+        '<h2>Order summary</h2>' + summary +
+        '<div style="display:flex;justify-content:space-between;margin-top:14px;font-size:18px"><span style="font-weight:700">Total</span><strong>' + B.money(B.cart.total()) + '</strong></div>' +
+        '<div class="bx-pickup" style="margin-top:18px">📍 ' + (store.addressLines || []).join(', ') + '</div>' +
+      '</aside>' +
+    '</div>';
+
+  document.getElementById("pickup-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = (this.name && this.name.value || "there").split(" ")[0];
+    var ref = "NH-" + (B.cart.count() * 7 + items.length * 13 + name.length);
+    B.cart.clear();
+    root.innerHTML =
+      '<div class="bx-empty" style="padding:80px 20px">' +
+        '<div style="font-size:48px;margin-bottom:10px">✅</div>' +
+        '<h1 style="margin:0 0 10px">You’re all set, ' + name + '!</h1>' +
+        '<p>Your order is reserved for pickup at ' + (store.name || 'our store') + '.<br>Reference <strong>' + ref + '</strong>. We’ll have it ready — pay when you arrive.</p>' +
+        '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">' +
+          '<a class="bx-btn" href="shop.html">Browse more</a>' +
+          '<a class="bx-btn bx-btn--ghost" href="store.html">Store info &amp; directions</a>' +
+        '</div>' +
+      '</div>';
+    window.scrollTo(0, 0);
+  });
+})();
+</script>
+</body>
+</html>

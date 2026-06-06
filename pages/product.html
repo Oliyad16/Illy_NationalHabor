@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product — illy Caffè National Harbor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="branch.css">
+</head>
+<body>
+<div data-chrome-header></div>
+
+<main class="bx-wrap" id="pdp-root"></main>
+
+<div data-chrome-footer></div>
+
+<script src="../branch-config.js"></script>
+<script src="catalog.js"></script>
+<script src="branch.js"></script>
+<script>
+(function () {
+  var B = window.ILLY_BRANCH;
+  B.renderChrome("Shop");
+  var id = new URLSearchParams(location.search).get("id");
+  var p = B.findProduct(id);
+  var root = document.getElementById("pdp-root");
+
+  if (!p) {
+    root.innerHTML = '<div class="bx-empty"><p>We couldn’t find that item.</p><a class="bx-btn" href="shop.html">Back to Shop</a></div>';
+    return;
+  }
+
+  document.title = p.name + " — illy Caffè National Harbor";
+  var catName = p.category === "machines" ? "Machines" : "Coffee";
+
+  root.innerHTML = '' +
+    '<nav class="bx-breadcrumb"><a href="index.html">Home</a> / <a href="shop.html?cat=' + p.category + '">' + catName + '</a> / <span>' + p.name.split(" — ")[0] + '</span></nav>' +
+    '<div class="bx-pdp">' +
+      '<div class="bx-pdp__media"><img src="' + p.img + '" alt="' + p.name + '"></div>' +
+      '<div class="bx-pdp__info">' +
+        (p.tag ? '<span class="bx-tag">' + p.tag + '</span>' : '') +
+        '<h1>' + p.name + '</h1>' +
+        '<p class="bx-pdp__price">' + B.money(p.price) + '</p>' +
+        '<p class="bx-pdp__blurb">' + p.blurb + '</p>' +
+        '<div class="bx-pickup" style="margin-bottom:22px">🏪 <strong>Free in-store pickup</strong>&nbsp;at National Harbor — usually ready within the hour.</div>' +
+        '<div class="bx-qty"><label for="qty">Quantity</label><input id="qty" type="number" min="1" value="1"></div>' +
+        '<button class="bx-btn bx-btn--lg" id="add">Add to pickup cart</button> ' +
+        '<a class="bx-btn bx-btn--ghost bx-btn--lg" href="shop.html?cat=' + p.category + '">Keep browsing</a>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById("add").addEventListener("click", function () {
+    var q = Math.max(1, parseInt(document.getElementById("qty").value, 10) || 1);
+    B.cart.add(p.id, q);
+    B.toast("Added " + q + " × “" + p.name.split(" — ")[0] + "” to your pickup cart.");
+  });
+})();
+</script>
+</body>
+</html>

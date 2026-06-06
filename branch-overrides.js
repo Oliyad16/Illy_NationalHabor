@@ -1,0 +1,487 @@
+(function () {
+  var config = window.BRANCH_CONFIG || {};
+  var phoneDisplay = config.phoneDisplay || "+1 (877) 469-4559";
+  var phoneHref = config.phoneHref || "+18774694559";
+  var addressLines = Array.isArray(config.addressLines) ? config.addressLines : [];
+
+  function applyPhone() {
+    document.querySelectorAll('a[href^="tel:"]').forEach(function (link) {
+      link.setAttribute("href", "tel:" + phoneHref);
+      var label = link.querySelector(".cc-footer__button__label") || link;
+      label.textContent = "Call - " + phoneDisplay;
+    });
+  }
+
+  function addBranchContact() {
+    var footerColumn = document.querySelector(".cc-footer__lastItems");
+    if (!footerColumn || document.querySelector(".branch-contact-card")) {
+      return;
+    }
+
+    var card = document.createElement("div");
+    card.className = "branch-contact-card";
+
+    var title = document.createElement("p");
+    title.className = "branch-contact-card__title";
+    title.textContent = config.name || "illy Caffe - New Branch";
+    card.appendChild(title);
+
+    addressLines.forEach(function (line) {
+      var item = document.createElement("p");
+      item.className = "branch-contact-card__line";
+      item.textContent = line;
+      card.appendChild(item);
+    });
+
+    var phone = document.createElement("a");
+    phone.className = "branch-contact-card__link";
+    phone.href = "tel:" + phoneHref;
+    phone.textContent = phoneDisplay;
+    card.appendChild(phone);
+
+    if (config.hours) {
+      var hours = document.createElement("p");
+      hours.className = "branch-contact-card__line";
+      hours.textContent = config.hours;
+      card.appendChild(hours);
+    }
+
+    footerColumn.appendChild(card);
+  }
+
+  function removeInjectedOverlays() {
+    document.querySelectorAll(".modal-backdrop").forEach(function (node) {
+      node.remove();
+    });
+
+    document.querySelectorAll("body *").forEach(function (node) {
+      if (node.children.length > 20) {
+        return;
+      }
+
+      var text = node.textContent || "";
+      if (
+        text.indexOf("Coffee is even better with cookies") !== -1 ||
+        text.indexOf("Accept All Cookies") !== -1
+      ) {
+        node.remove();
+      }
+    });
+
+    document.body.classList.remove("modal-open");
+    document.body.style.overflow = "";
+    document.body.style.paddingRight = "";
+  }
+
+  function cleanNavigation() {
+    var seenLabels = {};
+
+    document.querySelectorAll(".cc-menu__firstLevel").forEach(function (link) {
+      var label = link.textContent.replace(/\u200b/g, "").replace(/\s+/g, " ").trim();
+      var normalized = label.toUpperCase();
+
+      link.querySelectorAll("span").forEach(function (span) {
+        span.textContent = span.textContent.replace(/\u200b/g, "").replace(/\s+/g, " ").trim();
+      });
+
+      if (normalized === "PROFESSIONAL" && seenLabels[normalized]) {
+        var item = link.closest(".cc-menu__item");
+        if (item) {
+          item.remove();
+        }
+        return;
+      }
+
+      seenLabels[normalized] = true;
+    });
+  }
+
+  function eagerLoadImages() {
+    document.querySelectorAll("img").forEach(function (image) {
+      if (
+        image.closest(".cc-productTile") ||
+        image.closest(".product-tile") ||
+        image.closest(".fpls")
+      ) {
+        image.loading = "eager";
+      }
+
+      if (image.dataset.src && !image.getAttribute("src")) {
+        image.setAttribute("src", image.dataset.src);
+      }
+
+      if (image.dataset.srcset && !image.getAttribute("srcset")) {
+        image.setAttribute("srcset", image.dataset.srcset);
+      }
+    });
+
+    document.querySelectorAll("source[data-srcset]").forEach(function (source) {
+      if (!source.getAttribute("srcset")) {
+        source.setAttribute("srcset", source.dataset.srcset);
+      }
+    });
+  }
+
+  function removeEmptyEmbeds() {
+    document.querySelectorAll("iframe, object, embed").forEach(function (node) {
+      var src = node.getAttribute("src") || "";
+      var title = node.getAttribute("title") || "";
+      var isTrackingFrame =
+        src.indexOf("bounceexchange.com") !== -1 ||
+        src.indexOf("online-metrix") !== -1 ||
+        src.indexOf("adsrvr.org") !== -1 ||
+        title.toLowerCase() === "empty";
+
+      if (
+        !src ||
+        src === "about:blank" ||
+        node.offsetWidth === 0 ||
+        node.offsetHeight === 0 ||
+        isTrackingFrame
+      ) {
+        node.remove();
+      }
+    });
+  }
+
+  function neutralizeLiveForms() {
+    document.querySelectorAll("form").forEach(function (form) {
+      if (!form.getAttribute("data-original-action")) {
+        form.setAttribute("data-original-action", form.getAttribute("action") || "");
+      }
+
+      form.setAttribute("action", "#");
+
+      if (form.dataset.staticCloneHandled) {
+        return;
+      }
+
+      form.dataset.staticCloneHandled = "true";
+      form.addEventListener("submit", function (event) {
+        var message = form.querySelector(".static-clone-form-message");
+
+        event.preventDefault();
+
+        if (!message) {
+          message = document.createElement("p");
+          message.className = "static-clone-form-message";
+          form.appendChild(message);
+        }
+
+        message.textContent = "This static branch preview does not submit to illy.com.";
+      });
+    });
+  }
+
+  function showToast(message) {
+    var toast = document.querySelector(".static-clone-toast");
+
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.className = "static-clone-toast";
+      toast.setAttribute("role", "status");
+      document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    window.clearTimeout(window.__illyStaticToastTimer);
+    window.__illyStaticToastTimer = window.setTimeout(function () {
+      toast.remove();
+    }, 3600);
+  }
+
+  function setupMobileMenu() {
+    var toggle = document.querySelector(".js-menuMobile");
+    var close = document.querySelector(".js-closeMenu");
+
+    if (toggle && !toggle.dataset.staticCloneHandled) {
+      toggle.dataset.staticCloneHandled = "true";
+      toggle.addEventListener("click", function (event) {
+        event.preventDefault();
+        document.body.classList.toggle("mobile-menu-open");
+      });
+    }
+
+    if (close && !close.dataset.staticCloneHandled) {
+      close.dataset.staticCloneHandled = "true";
+      close.addEventListener("click", function (event) {
+        event.preventDefault();
+        document.body.classList.remove("mobile-menu-open");
+      });
+    }
+  }
+
+  function setupMegaMenus() {
+    document.querySelectorAll(".cc-menu__item").forEach(function (item) {
+      if (item.dataset.staticMegaHandled) {
+        return;
+      }
+
+      item.dataset.staticMegaHandled = "true";
+
+      function openMenu() {
+        if (window.matchMedia("(min-width: 1025px)").matches) {
+          document.querySelectorAll(".cc-menu__item.static-menu-open").forEach(function (openItem) {
+            if (openItem !== item) {
+              openItem.classList.remove("static-menu-open");
+            }
+          });
+          item.classList.add("static-menu-open");
+        }
+      }
+
+      item.addEventListener("mouseenter", openMenu);
+      item.addEventListener("mouseover", openMenu);
+      item.addEventListener("pointerover", openMenu);
+
+      item.addEventListener("mouseleave", function () {
+        item.classList.remove("static-menu-open");
+      });
+
+      item.querySelectorAll(".cc-menu__firstLevel").forEach(function (link) {
+        if (!item.querySelector(".cc-menu__dropdownMenu")) {
+          return;
+        }
+
+        link.addEventListener("click", function (event) {
+          if (window.matchMedia("(min-width: 1025px)").matches) {
+            event.preventDefault();
+            item.classList.toggle("static-menu-open");
+          }
+        });
+      });
+
+      item.addEventListener("focusin", function () {
+        if (window.matchMedia("(min-width: 1025px)").matches) {
+          item.classList.add("static-menu-open");
+        }
+      });
+
+      item.addEventListener("focusout", function () {
+        window.setTimeout(function () {
+          if (!item.contains(document.activeElement)) {
+            item.classList.remove("static-menu-open");
+          }
+        }, 100);
+      });
+    });
+  }
+
+  function setupStaticSearch() {
+    var panel = document.querySelector(".static-search-panel");
+
+    if (!panel) {
+      panel = document.createElement("div");
+      panel.className = "static-search-panel";
+      panel.hidden = true;
+      panel.innerHTML =
+        '<form class="static-search-panel__row" action="#">' +
+        '<input type="search" aria-label="Search" placeholder="Search the static preview" />' +
+        '<button type="submit">Search</button>' +
+        "</form>" +
+        '<p class="static-clone-form-message">Search is disabled in this static branch preview.</p>';
+      document.body.appendChild(panel);
+
+      panel.querySelector("form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        showToast("Search is disabled in this static preview.");
+      });
+    }
+
+    document.querySelectorAll("button.search, .js-searchOnMobileMenu").forEach(function (button) {
+      if (button.dataset.staticCloneHandled) {
+        return;
+      }
+
+      button.dataset.staticCloneHandled = "true";
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        panel.hidden = !panel.hidden;
+        if (!panel.hidden) {
+          panel.querySelector("input").focus();
+        }
+      });
+    });
+  }
+
+  function setupCartStub() {
+    var count = 0;
+
+    function updateCartCount() {
+      document.querySelectorAll(".cc-minicart__quantity").forEach(function (badge) {
+        badge.classList.add("static-cart-count");
+        badge.classList.remove("d-none");
+        badge.textContent = String(count);
+      });
+    }
+
+    document.querySelectorAll("button, a").forEach(function (control) {
+      var text = (control.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      var looksLikeAddToCart =
+        text === "add to cart" ||
+        control.className.indexOf("add-to-cart") !== -1 ||
+        control.getAttribute("data-pid");
+
+      if (!looksLikeAddToCart || control.dataset.staticCartHandled) {
+        return;
+      }
+
+      control.dataset.staticCartHandled = "true";
+      control.addEventListener("click", function (event) {
+        event.preventDefault();
+        count += 1;
+        updateCartCount();
+        showToast("Added to the static preview cart.");
+      });
+    });
+  }
+
+  function setupLinkStrategy() {
+    document.querySelectorAll("a[href]").forEach(function (link) {
+      var href = link.getAttribute("href");
+
+      if (!href || href.startsWith("#") || href.startsWith("tel:") || href.startsWith("mailto:")) {
+        return;
+      }
+
+      if (link.dataset.staticLinkHandled) {
+        return;
+      }
+
+      link.dataset.staticLinkHandled = "true";
+      link.addEventListener("click", function (event) {
+        var url;
+
+        try {
+          url = new URL(href, window.location.href);
+        } catch {
+          return;
+        }
+
+        if (url.hostname === window.location.hostname && url.pathname.indexOf("/en-us/coffee/all-coffee") === 0) {
+          var coffeeHeading = Array.from(document.querySelectorAll("h1,h2,h3")).find(function (heading) {
+            return /Our Coffee Selection/i.test(heading.textContent || "");
+          });
+
+          event.preventDefault();
+          if (coffeeHeading) {
+            coffeeHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          return;
+        }
+
+        if (url.hostname === "www.illy.com" || url.pathname.indexOf("/en-us/") === 0) {
+          event.preventDefault();
+          showToast("This link targets illy.com. Interior pages are not part of this static branch preview.");
+        }
+      });
+    });
+  }
+
+  function addProductBadges() {
+    var tiles = Array.from(document.querySelectorAll(".cc-homePage__productSlider .cc-productTile"));
+
+    tiles.slice(0, 3).forEach(function (tile) {
+      var contentTarget =
+        tile.querySelector(".cc-productTile__productSliderTile") ||
+        tile.querySelector(".product-tile") ||
+        tile;
+
+      if (contentTarget.querySelector(".static-product-badge")) {
+        return;
+      }
+
+      var badge = document.createElement("span");
+      badge.className = "static-product-badge";
+      badge.textContent = "Best Seller";
+      contentTarget.insertBefore(badge, contentTarget.firstChild);
+    });
+  }
+
+  function observeInjectedEmbeds() {
+    if (window.__illyStaticEmbedObserver) {
+      return;
+    }
+
+    window.__illyStaticEmbedObserver = new MutationObserver(function () {
+      removeEmptyEmbeds();
+    });
+
+    window.__illyStaticEmbedObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
+  }
+
+  function updateStaticMetadata() {
+    var description = "illy Caffe new branch preview with local contact details.";
+    var canonical = document.querySelector('link[rel="canonical"]');
+    var metaDescription = document.querySelector('meta[name="description"]');
+
+    document.title = config.name || "illy Caffe - New Branch";
+
+    if (metaDescription) {
+      metaDescription.setAttribute("content", description);
+    }
+
+    if (canonical) {
+      canonical.setAttribute("href", window.location.origin + window.location.pathname);
+    }
+
+    [
+      ["og:title", config.name || "illy Caffe - New Branch"],
+      ["og:description", description],
+      ["og:url", window.location.origin + window.location.pathname]
+    ].forEach(function (entry) {
+      var property = entry[0];
+      var content = entry[1];
+      var meta = document.querySelector('meta[property="' + property + '"]');
+
+      if (!meta) {
+        meta = document.createElement("meta");
+        meta.setAttribute("property", property);
+        document.head.appendChild(meta);
+      }
+
+      meta.setAttribute("content", content);
+    });
+  }
+
+  function init() {
+    updateStaticMetadata();
+    applyPhone();
+    addBranchContact();
+    cleanNavigation();
+    eagerLoadImages();
+    removeEmptyEmbeds();
+    observeInjectedEmbeds();
+    neutralizeLiveForms();
+    setupMobileMenu();
+    setupMegaMenus();
+    setupStaticSearch();
+    setupCartStub();
+    setupLinkStrategy();
+    addProductBadges();
+    removeInjectedOverlays();
+    window.setTimeout(removeInjectedOverlays, 500);
+    window.setTimeout(removeInjectedOverlays, 1500);
+    window.setTimeout(cleanNavigation, 500);
+    window.setTimeout(eagerLoadImages, 500);
+    window.setTimeout(removeEmptyEmbeds, 500);
+    window.setTimeout(removeEmptyEmbeds, 1500);
+    window.setTimeout(removeEmptyEmbeds, 3000);
+    window.setTimeout(neutralizeLiveForms, 500);
+    window.setTimeout(setupMobileMenu, 500);
+    window.setTimeout(setupMegaMenus, 500);
+    window.setTimeout(setupStaticSearch, 500);
+    window.setTimeout(setupCartStub, 500);
+    window.setTimeout(setupLinkStrategy, 500);
+    window.setTimeout(addProductBadges, 500);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

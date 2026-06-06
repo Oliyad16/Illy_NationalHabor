@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your Pickup Cart — illy Caffè National Harbor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="branch.css">
+</head>
+<body>
+<div data-chrome-header></div>
+
+<main class="bx-wrap">
+  <nav class="bx-breadcrumb"><a href="index.html">Home</a> / <span>Pickup Cart</span></nav>
+  <div class="bx-pagehead">
+    <h1>Your Pickup Cart</h1>
+    <p>Review your order, then reserve it for in-store pickup at our National Harbor location. You’ll pay when you collect.</p>
+  </div>
+  <div id="cart-root"></div>
+</main>
+
+<div data-chrome-footer></div>
+
+<script src="../branch-config.js"></script>
+<script src="catalog.js"></script>
+<script src="branch.js"></script>
+<script>
+(function () {
+  var B = window.ILLY_BRANCH;
+  B.renderChrome("Shop");
+  var root = document.getElementById("cart-root");
+
+  function render() {
+    var items = B.cart.items();
+    if (!items.length) {
+      root.innerHTML = '<div class="bx-empty"><p>Your pickup cart is empty.</p><a class="bx-btn" href="shop.html">Start browsing</a></div>';
+      return;
+    }
+    var rows = items.map(function (it) {
+      var p = it.product;
+      return '' +
+        '<div class="bx-cart-row" data-row="' + p.id + '">' +
+          '<div class="bx-cart-row__img"><img src="' + p.img + '" alt="' + p.name + '"></div>' +
+          '<div class="bx-cart-row__name">' + p.name + '</div>' +
+          '<div class="bx-cart-row__price">' + B.money(p.price) + '</div>' +
+          '<div><input type="number" min="1" value="' + it.qty + '" data-qty="' + p.id + '" style="width:60px;padding:8px;border:1px solid #e7ded6;border-radius:6px;font:inherit"></div>' +
+          '<div class="bx-cart-row__line">' + B.money(p.price * it.qty) + '</div>' +
+          '<button class="bx-cart-row__remove" data-remove="' + p.id + '">Remove</button>' +
+        '</div>';
+    }).join('');
+
+    root.innerHTML =
+      rows +
+      '<div class="bx-cart-summary">' +
+        '<div class="bx-cart-total">Total: ' + B.money(B.cart.total()) + '</div>' +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+          '<a class="bx-btn bx-btn--ghost" href="shop.html">Keep browsing</a>' +
+          '<button class="bx-btn bx-btn--lg" id="reserve">Reserve for in-store pickup</button>' +
+        '</div>' +
+        '<p style="font-size:13px;color:#8a7a6e;max-width:420px;text-align:right;margin:4px 0 0">Reserving holds your items for pickup at National Harbor. Payment is collected in store.</p>' +
+      '</div>';
+  }
+
+  root.addEventListener("change", function (e) {
+    var q = e.target.closest("[data-qty]");
+    if (q) {
+      B.cart.setQty(q.getAttribute("data-qty"), Math.max(1, parseInt(q.value, 10) || 1));
+      render();
+    }
+  });
+  root.addEventListener("click", function (e) {
+    var rm = e.target.closest("[data-remove]");
+    if (rm) { B.cart.remove(rm.getAttribute("data-remove")); render(); return; }
+    if (e.target.id === "reserve") {
+      location.href = "pickup.html";
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

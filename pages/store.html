@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Our Store — illy Caffè National Harbor</title>
+<meta name="description" content="Visit illy Caffè at National Harbor, Maryland. Hours, directions, and contact for in-store pickup orders.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="branch.css">
+</head>
+<body>
+<div data-chrome-header></div>
+
+<main class="bx-wrap">
+  <nav class="bx-breadcrumb"><a href="index.html">Home</a> / <span>Our Store</span></nav>
+  <div class="bx-pagehead">
+    <h1>Our Store at National Harbor</h1>
+    <p>Find us on the waterfront in National Harbor, Maryland — just across the river from Washington, DC. Order online and collect in store, or stop by for a fresh espresso.</p>
+  </div>
+
+  <div class="bx-store">
+    <div>
+      <div class="bx-store__card" id="contact">
+        <h2>Visit &amp; Contact</h2>
+        <div class="bx-store__row"><strong>Address</strong><span id="addr"></span></div>
+        <div class="bx-store__row"><strong>Hours</strong><span id="hours"></span></div>
+        <div class="bx-store__row"><strong>Phone</strong><a id="phone" href="#"></a></div>
+        <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+          <a class="bx-btn" href="shop.html">Order for pickup</a>
+          <a class="bx-btn bx-btn--ghost" id="dir" target="_blank" rel="noopener" href="#">Get directions</a>
+        </div>
+      </div>
+      <div class="bx-store__card" style="margin-top:24px">
+        <h2>How pickup works</h2>
+        <div class="bx-store__row"><strong>1.</strong><span>Browse our coffee &amp; machines and add to your pickup cart.</span></div>
+        <div class="bx-store__row"><strong>2.</strong><span>Reserve online — no payment needed up front.</span></div>
+        <div class="bx-store__row"><strong>3.</strong><span>Come to the National Harbor store, pay, and collect. Usually ready within the hour.</span></div>
+      </div>
+    </div>
+    <iframe class="bx-map" title="Map to illy Caffè National Harbor" loading="lazy"
+      src="https://www.google.com/maps?q=165+Waterfront+Street+National+Harbor+MD+20745&output=embed"></iframe>
+  </div>
+</main>
+
+<div data-chrome-footer></div>
+
+<script src="../branch-config.js"></script>
+<script src="catalog.js"></script>
+<script src="branch.js"></script>
+<script>
+(function () {
+  var B = window.ILLY_BRANCH, s = B.store || {};
+  B.renderChrome("Our Store");
+  document.getElementById("addr").textContent = (s.addressLines || []).join(", ");
+  document.getElementById("hours").textContent = s.hours || "";
+  var ph = document.getElementById("phone");
+  ph.textContent = s.phoneDisplay || "";
+  ph.href = "tel:" + (s.phoneHref || "");
+  document.getElementById("dir").href = "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent((s.addressLines || []).join(", "));
+})();
+</script>
+</body>
+</html>

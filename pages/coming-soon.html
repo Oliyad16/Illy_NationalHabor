@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coming Soon — illy Caffè National Harbor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="branch.css">
+</head>
+<body>
+<div data-chrome-header></div>
+
+<main class="bx-wrap">
+  <div class="bx-empty" style="padding:80px 20px">
+    <div style="font-size:46px;margin-bottom:10px">☕</div>
+    <h1 style="margin:0 0 10px" id="cs-title">This section is coming soon</h1>
+    <p id="cs-msg">We’re a local National Harbor store focused on coffee, machines, and in-store pickup. This page isn’t ready yet — but there’s plenty to browse.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+      <a class="bx-btn" href="shop.html">Shop coffee &amp; machines</a>
+      <a class="bx-btn bx-btn--ghost" href="store.html">Visit our store</a>
+    </div>
+  </div>
+</main>
+
+<div data-chrome-footer></div>
+
+<script src="../branch-config.js"></script>
+<script src="catalog.js"></script>
+<script src="branch.js"></script>
+<script>
+(function () {
+  window.ILLY_BRANCH.renderChrome("Shop");
+  var topic = new URLSearchParams(location.search).get("topic");
+  if (topic) {
+    document.getElementById("cs-title").textContent = "“" + topic + "” is coming soon";
+  }
+})();
+</script>
+</body>
+</html>
