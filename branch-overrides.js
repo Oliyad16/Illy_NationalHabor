@@ -336,6 +336,43 @@
     });
   }
 
+  // Map an illy.com /en-us/... path to one of our own branch pages.
+  // Returns a local URL string, or null if there's no mapping (caller decides fallback).
+  function mapToBranchPage(pathname) {
+    var path = pathname.replace(/^\/en-us\/?/, "").replace(/​/g, "");
+
+    // Product detail pages -> our product page, matched by SKU in the filename.
+    var skuMatch = path.match(/\/([A-Z0-9]+)\.html$/i);
+    if (skuMatch) {
+      var sku = skuMatch[1];
+      // Normalize a few homepage SKUs to the ones our catalog actually carries.
+      var skuAlias = { "60588": "60383", "25403": "25404", "A136ST": "8837ST" };
+      sku = skuAlias[sku] || sku;
+      if (window.ILLY_BRANCH && window.ILLY_BRANCH.findProduct && window.ILLY_BRANCH.findProduct(sku)) {
+        return "pages/product.html?id=" + sku;
+      }
+      return "pages/product.html?id=" + sku; // PDP page handles unknown ids gracefully
+    }
+
+    // Category / listing pages -> our shop, filtered.
+    if (/^coffee-machines/.test(path)) return "pages/shop.html?cat=machines";
+    if (/^coffee(\/|$)/.test(path)) return "pages/shop.html?cat=coffee";
+    if (/^coffee-delivery|^subscription/.test(path)) return "pages/shop.html?cat=coffee";
+    if (/^coffee-gifts|all-accessories|art-collection|^art(\/|$)/.test(path)) return "pages/shop.html";
+
+    // Store / service.
+    if (/^customer-care|^contact/.test(path)) return "pages/store.html#contact";
+    if (/^cart$/.test(path)) return "pages/cart.html";
+    if (/^shop|^store|location/.test(path)) return "pages/store.html";
+
+    return null;
+  }
+
+  function topicFromPath(pathname) {
+    var seg = pathname.replace(/^\/en-us\/?/, "").split("/")[0].replace(/[-%].*$/, "").replace(/-/g, " ");
+    return seg ? seg.charAt(0).toUpperCase() + seg.slice(1) : "";
+  }
+
   function setupLinkStrategy() {
     document.querySelectorAll("a[href]").forEach(function (link) {
       var href = link.getAttribute("href");
@@ -348,33 +385,33 @@
         return;
       }
 
+      var url;
+      try {
+        url = new URL(href, window.location.href);
+      } catch (e) {
+        return;
+      }
+
+      var isIllyInternal =
+        url.hostname === "www.illy.com" ||
+        (url.hostname === window.location.hostname && url.pathname.indexOf("/en-us/") === 0);
+
+      if (!isIllyInternal) {
+        return; // genuine external links (LinkedIn, app stores, etc.) stay as-is
+      }
+
+      // Rewrite the href up-front so hover/preview and middle-click also stay on-site.
+      var target = mapToBranchPage(url.pathname);
       link.dataset.staticLinkHandled = "true";
-      link.addEventListener("click", function (event) {
-        var url;
 
-        try {
-          url = new URL(href, window.location.href);
-        } catch {
-          return;
-        }
+      if (target) {
+        link.setAttribute("href", target);
+        return;
+      }
 
-        if (url.hostname === window.location.hostname && url.pathname.indexOf("/en-us/coffee/all-coffee") === 0) {
-          var coffeeHeading = Array.from(document.querySelectorAll("h1,h2,h3")).find(function (heading) {
-            return /Our Coffee Selection/i.test(heading.textContent || "");
-          });
-
-          event.preventDefault();
-          if (coffeeHeading) {
-            coffeeHeading.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-          return;
-        }
-
-        if (url.hostname === "www.illy.com" || url.pathname.indexOf("/en-us/") === 0) {
-          event.preventDefault();
-          showToast("This link targets illy.com. Interior pages are not part of this static branch preview.");
-        }
-      });
+      // No specific page yet -> branded on-site "coming soon" (keeps users here).
+      var topic = topicFromPath(url.pathname);
+      link.setAttribute("href", "pages/coming-soon.html" + (topic ? "?topic=" + encodeURIComponent(topic) : ""));
     });
   }
 
