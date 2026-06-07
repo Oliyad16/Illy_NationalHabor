@@ -13,7 +13,7 @@
 <div data-chrome-header></div>
 
 <main class="bx-wrap">
-  <nav class="bx-breadcrumb"><a href="index.html">Home</a> / <span>Our Store</span></nav>
+  <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>Our Store</span></nav>
   <div class="bx-pagehead">
     <h1>Our Store at National Harbor</h1>
     <p>Find us on the waterfront in National Harbor, Maryland — just across the river from Washington, DC. Order online and collect in store, or stop by for a fresh espresso.</p>
@@ -28,7 +28,7 @@
         <div class="bx-store__row"><strong>Phone</strong><a id="phone" href="#"></a></div>
         <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
           <a class="bx-btn" href="shop.html">Order for pickup</a>
-          <a class="bx-btn bx-btn--ghost" id="dir" target="_blank" rel="noopener" href="#">Get directions</a>
+          <a class="bx-btn bx-btn--ghost" href="#map">View map</a>
         </div>
       </div>
       <div class="bx-store__card" style="margin-top:24px">
@@ -38,8 +38,8 @@
         <div class="bx-store__row"><strong>3.</strong><span>Come to the National Harbor store, pay, and collect. Usually ready within the hour.</span></div>
       </div>
     </div>
-    <iframe class="bx-map" title="Map to illy Caffè National Harbor" loading="lazy"
-      src="https://www.google.com/maps?q=165+Waterfront+Street+National+Harbor+MD+20745&output=embed"></iframe>
+    <iframe id="map" class="bx-map" title="Map to Illy Cafe dmv — National Harbor" loading="lazy"
+      src="https://www.google.com/maps?q=138+Waterfront+St+Oxon+Hill+MD+20745&output=embed"></iframe>
   </div>
 </main>
 
@@ -57,7 +57,6 @@
   var ph = document.getElementById("phone");
   ph.textContent = s.phoneDisplay || "";
   ph.href = "tel:" + (s.phoneHref || "");
-  document.getElementById("dir").href = "https://www.google.com/maps/dir/?api=1&destination=" + encodeURIComponent((s.addressLines || []).join(", "));
 })();
 </script>
 </body>

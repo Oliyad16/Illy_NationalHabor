@@ -4,11 +4,11 @@
 window.ILLY_BRANCH = window.ILLY_BRANCH || {};
 
 window.ILLY_BRANCH.store = {
-  name: "illy Caffè — National Harbor",
-  addressLines: ["165 Waterfront Street", "National Harbor, MD 20745"],
+  name: "Illy Cafe dmv — National Harbor",
+  addressLines: ["138 Waterfront St", "Oxon Hill, MD 20745"],
   phoneDisplay: "+1 (877) 469-4559",
   phoneHref: "+18774694559",
-  hours: "Mon–Sun · 7:00 AM – 8:00 PM"
+  hours: "Open daily · Closes 7:00 PM"
 };
 
 // Image base (relative to /pages/, so prefixed with ../)

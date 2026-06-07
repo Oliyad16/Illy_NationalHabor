@@ -21,7 +21,7 @@
 <script>
 (function () {
   var B = window.ILLY_BRANCH;
-  B.renderChrome("Shop");
+  B.renderChrome("Coffee");
   var id = new URLSearchParams(location.search).get("id");
   var p = B.findProduct(id);
   var root = document.getElementById("pdp-root");
@@ -35,7 +35,7 @@
   var catName = p.category === "machines" ? "Machines" : "Coffee";
 
   root.innerHTML = '' +
-    '<nav class="bx-breadcrumb"><a href="index.html">Home</a> / <a href="shop.html?cat=' + p.category + '">' + catName + '</a> / <span>' + p.name.split(" — ")[0] + '</span></nav>' +
+    '<nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <a href="shop.html?cat=' + p.category + '">' + catName + '</a> / <span>' + p.name.split(" — ")[0] + '</span></nav>' +
     '<div class="bx-pdp">' +
       '<div class="bx-pdp__media"><img src="' + p.img + '" alt="' + p.name + '"></div>' +
       '<div class="bx-pdp__info">' +

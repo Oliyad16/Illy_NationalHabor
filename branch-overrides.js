@@ -238,19 +238,6 @@
         item.classList.remove("static-menu-open");
       });
 
-      item.querySelectorAll(".cc-menu__firstLevel").forEach(function (link) {
-        if (!item.querySelector(".cc-menu__dropdownMenu")) {
-          return;
-        }
-
-        link.addEventListener("click", function (event) {
-          if (window.matchMedia("(min-width: 1025px)").matches) {
-            event.preventDefault();
-            item.classList.toggle("static-menu-open");
-          }
-        });
-      });
-
       item.addEventListener("focusin", function () {
         if (window.matchMedia("(min-width: 1025px)").matches) {
           item.classList.add("static-menu-open");
@@ -395,10 +382,12 @@
     }
 
     // Category / listing pages -> our shop, filtered.
-    if (/^coffee-machines/.test(path)) return "pages/shop.html?cat=machines";
-    if (/^coffee(\/|$)/.test(path)) return "pages/shop.html?cat=coffee";
-    if (/^coffee-delivery|^subscription/.test(path)) return "pages/shop.html?cat=coffee";
-    if (/^coffee-gifts|all-accessories|art-collection|^art(\/|$)/.test(path)) return "pages/shop.html";
+    if (/^coffee-machines/.test(path)) return "pages/section.html?cat=machines";
+    if (/^coffee(\/|$)/.test(path)) return "pages/section.html?cat=coffee";
+    if (/^coffee-delivery|^subscription/.test(path)) return "pages/section.html?cat=subscriptions";
+    if (/^coffee-gifts|all-accessories|art-collection|^art(\/|$)|^machine-gifts|^hosting-gifts/.test(path)) return "pages/section.html?cat=gifts";
+    if (/^coffee-offers|^promotion|^promotions|^sale|^offers/.test(path)) return "pages/section.html?cat=promotions";
+    if (/^quality|^universita-del-caffe|^illy-world|^illyworld|^illy-mission|^company|^sustainability|^live-happilly/.test(path)) return "pages/section.html?cat=illyworld";
 
     // Store / service.
     if (/^customer-care|^contact/.test(path)) return "pages/store.html#contact";
@@ -553,7 +542,26 @@
     window.setTimeout(setupStaticSearch, 500);
     window.setTimeout(setupCartStub, 500);
     window.setTimeout(setupLinkStrategy, 500);
+    window.setTimeout(setupLinkStrategy, 1500);
+    window.setTimeout(setupLinkStrategy, 3000);
+    window.setTimeout(setupCartStub, 1500);
     window.setTimeout(addProductBadges, 500);
+    observeForLateLinks();
+  }
+
+  // Footer and lazy modules can inject links after our passes run.
+  // Keep rewriting any newly-added illy.com links so nothing ever leaves the site.
+  function observeForLateLinks() {
+    if (window.__illyLinkObserver) {
+      return;
+    }
+    window.__illyLinkObserver = new MutationObserver(function () {
+      setupLinkStrategy();
+    });
+    window.__illyLinkObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true
+    });
   }
 
   if (document.readyState === "loading") {

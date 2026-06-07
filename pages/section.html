@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>illy Caffè National Harbor</title>
+<meta name="description" content="Browse illy coffee, machines, gifts, promotions, and store pickup at National Harbor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="branch.css">
+</head>
+<body>
+<div data-chrome-header></div>
+
+<main id="section-root"></main>
+
+<div data-chrome-footer></div>
+
+<script src="../branch-config.js"></script>
+<script src="catalog.js"></script>
+<script src="branch.js"></script>
+<script>
+(function () {
+  var B = window.ILLY_BRANCH;
+  var key = new URLSearchParams(location.search).get("cat") || "coffee";
+  var sections = {
+    subscriptions: {
+      active: "Subscriptions",
+      title: "Coffee subscriptions, local pickup ease",
+      eyebrow: "Subscriptions",
+      copy: "Set up your regular illy rhythm with the same clean shopping experience: familiar blends, clear choices, and pickup support from the National Harbor store.",
+      image: "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dwac17de29/menu_desktop/abbonamentocaffe.c53d20d638.jpg",
+      cta: ["Shop coffee", "shop.html?cat=coffee"],
+      tiles: [
+        ["Coffee Subscription", "Choose your preferred roast and format."],
+        ["Pickup Favorites", "Reserve the coffee you buy most often."],
+        ["Store Support", "Questions are handled by the local team."]
+      ],
+      products: "coffee"
+    },
+    coffee: {
+      active: "Coffee",
+      title: "Coffee",
+      eyebrow: "illy Coffee",
+      copy: "Explore whole bean, ground coffee, and capsules with the polished illy catalog feel, then reserve available items for in-store pickup.",
+      image: "../assets/www.illy.com/livestory/video/illy/posts/orig/69e0fa3b09ef75f1282a05df.2ea7669f7b.png",
+      cta: ["Shop all coffee", "shop.html?cat=coffee"],
+      tiles: [
+        ["Whole Bean Coffee", "Freshly ground at home for full aroma."],
+        ["IperEspresso Capsules", "Consistent espresso with rich crema."],
+        ["Ground Coffee", "Ready for drip, moka, and daily brewing."]
+      ],
+      products: "coffee"
+    },
+    machines: {
+      active: "Coffee Machines",
+      title: "Coffee Machines",
+      eyebrow: "Espresso at home",
+      copy: "Find compact capsule machines and espresso makers with the same category structure as illy: clear product families, premium imagery, and direct paths to the catalog.",
+      image: "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dw086f29f1/menu_desktop/abbonamentomacchina.feabf17ad5.jpg",
+      cta: ["Shop machines", "shop.html?cat=machines"],
+      tiles: [
+        ["All Coffee Machines", "Browse available machines for pickup."],
+        ["IperEspresso Machines", "Designed for illy capsules."],
+        ["E.S.E. Pod Machines", "Simple espresso with paper pods."]
+      ],
+      products: "machines"
+    },
+    gifts: {
+      active: "Gift and Accessories",
+      title: "Gift and Accessories",
+      eyebrow: "Curated gifts",
+      copy: "Gift bundles, cups, art collection pieces, and coffee accessories presented in the same illy editorial style, with local availability guided by the store.",
+      image: "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dw0cd3fe9a/Menu_IAC_Genesi.d859a99276.jpg",
+      cta: ["Browse pickup shop", "shop.html"],
+      tiles: [
+        ["Gifts for Coffee Lovers", "Coffee classics and premium pairings."],
+        ["Machine Gifts & Bundles", "Machines paired with capsules."],
+        ["Coffee & Tea Accessories", "Cups, tools, and serving pieces."]
+      ],
+      products: "all"
+    },
+    promotions: {
+      active: "Promotions",
+      title: "Promotions",
+      eyebrow: "Current offers",
+      copy: "A local promotions page that keeps customers inside the same illy-style shopping flow instead of sending them to unfinished external pages.",
+      image: "../assets/www.illy.com/livestory/video/illy/posts/orig/69e0fa124a2aedd4d1d953bb.8171f33675.jpg",
+      cta: ["Shop best sellers", "shop.html"],
+      tiles: [
+        ["Best Sellers", "Popular coffee and machines for pickup."],
+        ["Coffee Offers", "Featured blends and capsule options."],
+        ["Store Pickup", "Reserve online and collect locally."]
+      ],
+      products: "all"
+    },
+    illyworld: {
+      active: "Illyworld",
+      title: "Illyworld",
+      eyebrow: "The world of illy",
+      copy: "A branded illyworld landing page for story, culture, sustainability, and art collection content, matching the same navigation and section template.",
+      image: "../assets/www.illy.com/livestory/video/illy/posts/orig/67a376d23c37f6ce48da7e4e.f76ca24d67.png",
+      cta: ["Visit our store", "store.html"],
+      tiles: [
+        ["Sustainability", "A long-term commitment to quality coffee."],
+        ["Art Collection", "Creative collaborations and collectible cups."],
+        ["Caffè Culture", "The illy experience in every detail."]
+      ],
+      products: "coffee"
+    }
+  };
+  var data = sections[key] || sections.coffee;
+  var products = B.products.filter(function (p) {
+    return data.products === "all" || p.category === data.products;
+  }).slice(0, 4);
+
+  document.title = data.title + " — illy Caffè National Harbor";
+  B.renderChrome(data.active);
+
+  document.getElementById("section-root").innerHTML =
+    '<section class="bx-section-hero">' +
+      '<div class="bx-section-hero__copy">' +
+        '<nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>' + data.title + '</span></nav>' +
+        '<p class="bx-eyebrow">' + data.eyebrow + '</p>' +
+        '<h1>' + data.title + '</h1>' +
+        '<p>' + data.copy + '</p>' +
+        '<a class="bx-btn bx-btn--lg" href="' + data.cta[1] + '">' + data.cta[0] + '</a>' +
+      '</div>' +
+      '<div class="bx-section-hero__media"><img src="' + data.image + '" alt="' + data.title + '"></div>' +
+    '</section>' +
+    '<section class="bx-section-band">' +
+      '<div class="bx-section-band__inner">' +
+        data.tiles.map(function (tile) {
+          return '<article class="bx-category-tile"><h2>' + tile[0] + '</h2><p>' + tile[1] + '</p></article>';
+        }).join('') +
+      '</div>' +
+    '</section>' +
+    '<section class="bx-wrap bx-section-products">' +
+      '<div class="bx-section-title"><h2>Featured for pickup</h2><a href="shop.html">View all</a></div>' +
+      '<div class="bx-grid">' +
+        products.map(function (p) {
+          return '<article class="bx-card">' +
+            '<a class="bx-card__imgwrap" href="product.html?id=' + p.id + '"><img src="' + p.img + '" alt="' + p.name + '" loading="lazy"></a>' +
+            '<div class="bx-card__body">' +
+              (p.tag ? '<span class="bx-tag">' + p.tag + '</span>' : '') +
+              '<h2 class="bx-card__name"><a href="product.html?id=' + p.id + '">' + p.name + '</a></h2>' +
+              '<p class="bx-card__price">' + B.money(p.price) + '</p>' +
+              '<button class="bx-btn bx-btn--full" data-add="' + p.id + '">Add to pickup cart</button>' +
+            '</div>' +
+          '</article>';
+        }).join('') +
+      '</div>' +
+    '</section>';
+
+  document.getElementById("section-root").addEventListener("click", function (e) {
+    var btn = e.target.closest("[data-add]");
+    if (!btn) return;
+    B.cart.add(btn.getAttribute("data-add"), 1);
+    var p = B.findProduct(btn.getAttribute("data-add"));
+    B.toast("Added \"" + p.name.split(" - ")[0] + "\" to your pickup cart.");
+  });
+})();
+</script>
+</body>
+</html>
