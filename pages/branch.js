@@ -68,83 +68,93 @@
   };
 
   /* ---------- Header / footer ---------- */
+  /* Real café food photos (DoorDash storefront CDN) used for mega-menu features. */
+  var PB = "https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1200,height=672,format=auto/" +
+           "https://doordash-static.s3.amazonaws.com/media/photosV2/";
+
   var NAV = [
     {
-      label: "Subscriptions",
-      active: "Subscriptions",
-      href: "section.html?cat=subscriptions",
+      label: "Menu",
+      active: "Menu",
+      href: "section.html?cat=menu",
       links: [
-        ["Coffee Subscription", "section.html?cat=subscriptions"],
-        ["Pickup Favorites", "shop.html?cat=coffee"],
-        ["How Pickup Works", "store.html#contact"]
+        ["Full Menu", "menu.html"],
+        ["Breakfast & Brunch", "section.html?cat=food#breakfast"],
+        ["Lunch", "section.html?cat=food#lunch"],
+        ["Drinks", "section.html?cat=drinks"],
+        ["Sweets & Bakery", "section.html?cat=food#sweets"]
       ],
-      feature: ["Coffee subscription", "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dwac17de29/menu_desktop/abbonamentocaffe.c53d20d638.jpg"]
+      feature: ["Order for pickup", PB + "7d86b7c6-b3f1-46f7-8538-95acf6a17d76-retina-large.jpg"]
     },
     {
-      label: "Coffee",
-      active: "Coffee",
-      href: "section.html?cat=coffee",
+      label: "Drinks",
+      active: "Drinks",
+      href: "section.html?cat=drinks",
       links: [
-        ["All Coffee", "shop.html?cat=coffee"],
-        ["Whole Bean Coffee", "shop.html?cat=coffee"],
-        ["IperEspresso Capsules", "shop.html?cat=coffee"],
-        ["Ground Coffee", "shop.html?cat=coffee"]
+        ["Espresso Bar (Hot & Cold)", "menu.html#cat-espresso-bar"],
+        ["Small Espresso Drinks", "menu.html#cat-small-espresso-drinks"],
+        ["Tea Lattes", "menu.html#cat-tea-lattes"],
+        ["Gelato", "menu.html#cat-gelato"],
+        ["Brewed Coffee & Hot Chocolate", "menu.html#cat-brewed-coffee"]
       ],
-      feature: ["All Coffee", "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dw17fd75be/menu_desktop/allcoffee.75ed6ecad9.jpg"]
+      feature: ["illy espresso, hot & cold", PB + "20afbf30-27e1-4bc9-ab0c-a7103f166dc1-retina-large.jpg"]
     },
     {
-      label: "Coffee Machines",
-      active: "Coffee Machines",
-      href: "section.html?cat=machines",
+      label: "Food",
+      active: "Food",
+      href: "section.html?cat=food",
       links: [
-        ["All Coffee Machines", "shop.html?cat=machines"],
-        ["IperEspresso Machines", "shop.html?cat=machines"],
-        ["E.S.E. Pod Machines", "shop.html?cat=machines"],
-        ["Machine Tutorials", "section.html?cat=machines"]
+        ["Breakfast Sandwiches", "menu.html#cat-breakfast-sandwiches"],
+        ["Bagels & Avocado Toasts", "menu.html#cat-bagels"],
+        ["Salads & Lunch Sandwiches", "menu.html#cat-salads-lunch"],
+        ["Pasta", "menu.html#cat-pasta-lunch"],
+        ["Sweets & Bakery", "menu.html#cat-bakery-pastries"]
       ],
-      feature: ["All Coffee Machines", "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dw086f29f1/menu_desktop/abbonamentomacchina.feabf17ad5.jpg"]
+      feature: ["Fresh, made to order", PB + "b97ec77a-0889-4852-a4a3-a34e55b6e0cf-retina-large.jpg"]
     },
     {
-      label: "Gift and Accessories",
-      active: "Gift and Accessories",
-      href: "section.html?cat=gifts",
+      label: "Rewards",
+      active: "Rewards",
+      href: "section.html?cat=rewards",
       links: [
-        ["Coffee Gifts", "section.html?cat=gifts"],
-        ["Machine Gifts & Bundles", "section.html?cat=gifts"],
-        ["illy Art Collection", "section.html?cat=gifts"],
-        ["Accessories", "section.html?cat=gifts"]
+        ["How Rewards Work", "section.html?cat=rewards"],
+        ["Free Tier", "section.html?cat=rewards#free"],
+        ["Gold Tier", "section.html?cat=rewards#gold"],
+        ["VIP Tier", "section.html?cat=rewards#vip"],
+        ["Join & Earn", "menu.html"]
       ],
-      feature: ["Accessories", "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dw256de868/menu_desktop/accessories.ab21d166e3.jpg"]
+      feature: ["Earn on every pickup", PB + "7d86b7c6-b3f1-46f7-8538-95acf6a17d76-retina-large.jpg"]
     },
     {
-      label: "Promotions",
-      active: "Promotions",
-      href: "section.html?cat=promotions",
+      label: "Gift Cards",
+      active: "Gift Cards",
+      href: "section.html?cat=giftcards",
       links: [
-        ["Current Offers", "section.html?cat=promotions"],
-        ["Best Sellers", "shop.html"],
-        ["Coffee Deals", "shop.html?cat=coffee"]
+        ["Buy a Gift Card", "section.html?cat=giftcards"],
+        ["Check Balance", "section.html?cat=giftcards#balance"],
+        ["How It Works", "section.html?cat=giftcards#how"]
       ],
-      feature: ["Current Offers", "../assets/www.illy.com/livestory/video/illy/posts/orig/69e0fa124a2aedd4d1d953bb.8171f33675.jpg"]
+      feature: ["The gift of illy", PB + "20afbf30-27e1-4bc9-ab0c-a7103f166dc1-retina-large.jpg"]
     },
     {
-      label: "Illyworld",
-      active: "Illyworld",
-      href: "section.html?cat=illyworld",
+      label: "Visit Us",
+      active: "Visit Us",
+      href: "section.html?cat=visit",
       links: [
-        ["The illy Story", "section.html?cat=illyworld"],
-        ["Sustainability", "section.html?cat=illyworld"],
-        ["Art Collection", "section.html?cat=gifts"],
-        ["Visit Our Store", "store.html"]
+        ["Hours & Location", "store.html"],
+        ["Order for Pickup", "menu.html"],
+        ["Our Story", "section.html?cat=story"],
+        ["Illy World", "section.html?cat=illyworld"],
+        ["Contact", "store.html#contact"]
       ],
-      feature: ["illy World", "../assets/www.illy.com/livestory/video/illy/posts/orig/67a376d23c37f6ce48da7e4e.f76ca24d67.png"]
+      feature: ["138 Waterfront Street", PB + "bc04eca2-f0ad-4390-81be-4c01c618920f-retina-large.jpg"]
     }
   ];
 
   B.renderChrome = function (active) {
     var logo = "../assets/www.illy.com/on/demandware.static/Sites-illy_US_SFRA-Site/-/default/dwa1d7fec0/images/logo-illy.0d478fb603.svg";
     var header =
-      '<div class="bx-topbar">Free shipping on orders over $50+ &nbsp;|&nbsp; Order online and pick up at National Harbor</div>' +
+      '<div class="bx-topbar">Order online &amp; skip the line &nbsp;|&nbsp; Pickup at 138 Waterfront Street, National Harbor</div>' +
       '<header class="bx-header">' +
         '<a class="bx-header__brand" href="../index.html">' +
           '<img src="' + logo + '" alt="illy" />' +
@@ -169,6 +179,7 @@
           }).join('') +
         '</nav>' +
         '<div class="bx-header__right">' +
+          '<a class="bx-btn" href="menu.html" style="padding:9px 16px;font-size:13px">Order Online</a>' +
           '<a class="bx-cartlink" href="cart.html">Cart' +
             '<span class="bx-cartlink__count" data-cart-count>0</span>' +
           '</a>' +
@@ -179,14 +190,19 @@
       '<footer class="bx-footer">' +
         '<div class="bx-footer__inner">' +
           '<div>' +
-            '<h3>Shop</h3>' +
-            '<a href="section.html?cat=subscriptions">Subscriptions</a>' +
-            '<a href="section.html?cat=coffee">Coffee</a>' +
-            '<a href="section.html?cat=machines">Coffee Machines</a>' +
-            '<a href="section.html?cat=gifts">Gift and Accessories</a>' +
-            '<a href="section.html?cat=promotions">Promotions</a>' +
-            '<a href="section.html?cat=illyworld">Illyworld</a>' +
+            '<h3>Order</h3>' +
+            '<a href="menu.html">Full Menu</a>' +
+            '<a href="section.html?cat=drinks">Drinks</a>' +
+            '<a href="section.html?cat=food">Food</a>' +
+            '<a href="menu.html">Order for Pickup</a>' +
             '<a href="cart.html">Your Pickup Cart</a>' +
+          '</div>' +
+          '<div>' +
+            '<h3>More</h3>' +
+            '<a href="section.html?cat=rewards">Rewards</a>' +
+            '<a href="section.html?cat=giftcards">Gift Cards</a>' +
+            '<a href="section.html?cat=story">Our Story</a>' +
+            '<a href="section.html?cat=illyworld">Illy World</a>' +
           '</div>' +
           '<div>' +
             '<h3>Visit Us</h3>' +

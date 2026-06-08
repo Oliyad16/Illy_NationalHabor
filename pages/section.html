@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>illy Caffè National Harbor</title>
-<meta name="description" content="Browse illy coffee, machines, gifts, promotions, and store pickup at National Harbor.">
+<meta name="description" content="Order illy Caffè breakfast, lunch, espresso drinks and sweets for pickup at National Harbor.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="branch.css">
+<link rel="stylesheet" href="menu.css">
 </head>
 <body>
 <div data-chrome-header></div>
@@ -19,108 +20,251 @@
 <script src="../branch-config.js"></script>
 <script src="catalog.js"></script>
 <script src="branch.js"></script>
+<script src="menu.js"></script>
+<script src="menu-cart.js"></script>
+<script src="menu-ui.js"></script>
 <script>
 (function () {
-  var B = window.ILLY_BRANCH;
-  var key = new URLSearchParams(location.search).get("cat") || "coffee";
-  var sections = {
-    subscriptions: {
-      active: "Subscriptions",
-      title: "Coffee subscriptions, local pickup ease",
-      eyebrow: "Subscriptions",
-      copy: "Set up your regular illy rhythm with the same clean shopping experience: familiar blends, clear choices, and pickup support from the National Harbor store.",
-      image: "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dwac17de29/menu_desktop/abbonamentocaffe.c53d20d638.jpg",
-      cta: ["Shop coffee", "shop.html?cat=coffee"],
+  var B = window.ILLY_BRANCH, M = window.ILLY_MENU, UI = B.MENU_UI;
+  var key = new URLSearchParams(location.search).get("cat") || "menu";
+
+  /* Helper: collect all items across a list of category ids */
+  function itemsFromCats(ids) {
+    var out = [];
+    M.categories.forEach(function (c) {
+      if (ids.indexOf(c.id) !== -1) {
+        c.items.forEach(function (it) { out.push(it); });
+      }
+    });
+    return out;
+  }
+  /* Helper: featured items (prefer ones with photos, in-stock) */
+  function featured(ids, n) {
+    var items = itemsFromCats(ids).filter(function (i) { return !i.outOfStock; });
+    var withPhoto = items.filter(function (i) { return M.photoUrl(i); });
+    var rest = items.filter(function (i) { return !M.photoUrl(i); });
+    return withPhoto.concat(rest).slice(0, n || 6);
+  }
+
+  /* DoorDash photo base for hero images */
+  var PB = M.photoBase;
+
+  var SECTIONS = {
+    menu: {
+      active: "Menu",
+      title: "The full illy Caffè menu",
+      eyebrow: "Order online",
+      copy: "Breakfast, lunch, espresso drinks, gelato and sweets — made fresh and ready when you arrive. Browse the full menu and reserve for pickup at our National Harbor café.",
+      image: PB + "7d86b7c6-b3f1-46f7-8538-95acf6a17d76-retina-large.jpg",
+      cta: ["See full menu", "menu.html"],
       tiles: [
-        ["Coffee Subscription", "Choose your preferred roast and format."],
-        ["Pickup Favorites", "Reserve the coffee you buy most often."],
-        ["Store Support", "Questions are handled by the local team."]
+        ["Breakfast & Brunch", "Sandwiches, bagels, toasts and pancakes."],
+        ["Lunch", "Salads, focaccia sandwiches and pasta."],
+        ["Espresso Bar & Sweets", "illy espresso, gelato and fresh pastries."]
       ],
-      products: "coffee"
+      gridTitle: "Customer favorites",
+      gridItems: function () {
+        return featured(["breakfast-sandwiches", "sandwiches-lunch", "avocado-toasts", "pasta-lunch", "sweets", "espresso-bar"], 8);
+      }
     },
-    coffee: {
-      active: "Coffee",
-      title: "Coffee",
-      eyebrow: "illy Coffee",
-      copy: "Explore whole bean, ground coffee, and capsules with the polished illy catalog feel, then reserve available items for in-store pickup.",
-      image: "../assets/www.illy.com/livestory/video/illy/posts/orig/69e0fa3b09ef75f1282a05df.2ea7669f7b.png",
-      cta: ["Shop all coffee", "shop.html?cat=coffee"],
+
+    drinks: {
+      active: "Drinks",
+      title: "illy espresso, hot & cold",
+      eyebrow: "The Espresso Bar",
+      copy: "Authentic illy espresso drinks made to order — lattes, cappuccinos, cold brew, tea lattes, gelato and more. Customize your size, milk and syrups, then pick up in store.",
+      image: PB + "20afbf30-27e1-4bc9-ab0c-a7103f166dc1-retina-large.jpg",
+      cta: ["Order a drink", "menu.html#cat-espresso-bar"],
       tiles: [
-        ["Whole Bean Coffee", "Freshly ground at home for full aroma."],
-        ["IperEspresso Capsules", "Consistent espresso with rich crema."],
-        ["Ground Coffee", "Ready for drip, moka, and daily brewing."]
+        ["Hot Espresso", "Latte, cappuccino, mocha, cortado and more."],
+        ["Cold & Iced", "Cold brew, shakerato, iced lattes."],
+        ["Tea & Gelato", "Matcha, chai, and house-made gelato."]
       ],
-      products: "coffee"
+      gridTitle: "Popular drinks",
+      gridItems: function () {
+        return itemsFromCats(["espresso-bar", "small-espresso-drinks", "tea-lattes", "gelato", "brewed-coffee", "hot-chocolate"]);
+      },
+      groupByCategory: ["small-espresso-drinks", "espresso-bar", "tea-lattes", "gelato", "brewed-coffee", "hot-chocolate", "rtd-drinks"]
     },
-    machines: {
-      active: "Coffee Machines",
-      title: "Coffee Machines",
-      eyebrow: "Espresso at home",
-      copy: "Find compact capsule machines and espresso makers with the same category structure as illy: clear product families, premium imagery, and direct paths to the catalog.",
-      image: "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dw086f29f1/menu_desktop/abbonamentomacchina.feabf17ad5.jpg",
-      cta: ["Shop machines", "shop.html?cat=machines"],
+
+    food: {
+      active: "Food",
+      title: "Fresh food, made to order",
+      eyebrow: "Breakfast · Lunch · Sweets",
+      copy: "From breakfast croissant sandwiches and avocado toast to lunch salads, focaccia sandwiches, pasta and a full bakery case — all prepared fresh at the café.",
+      image: PB + "b97ec77a-0889-4852-a4a3-a34e55b6e0cf-retina-large.jpg",
+      cta: ["Order food", "menu.html#cat-breakfast-sandwiches"],
       tiles: [
-        ["All Coffee Machines", "Browse available machines for pickup."],
-        ["IperEspresso Machines", "Designed for illy capsules."],
-        ["E.S.E. Pod Machines", "Simple espresso with paper pods."]
+        ["Breakfast & Brunch", "Sandwiches, bagels, toasts, pancakes."],
+        ["Lunch", "Salads, sandwiches and pasta."],
+        ["Sweets & Bakery", "Pastries, cakes and desserts."]
       ],
-      products: "machines"
+      gridTitle: "On the menu",
+      gridItems: function () {
+        return itemsFromCats(["breakfast-sandwiches", "bagels", "avocado-toasts", "pancakes", "salads-lunch", "sandwiches-lunch", "pasta-lunch", "bakery-pastries", "sweets"]);
+      },
+      groupByCategory: ["breakfast-sandwiches", "bagels", "avocado-toasts", "pancakes", "salads-lunch", "sandwiches-lunch", "pasta-lunch", "bakery-pastries", "sweets", "a-la-carte"]
     },
-    gifts: {
-      active: "Gift and Accessories",
-      title: "Gift and Accessories",
-      eyebrow: "Curated gifts",
-      copy: "Gift bundles, cups, art collection pieces, and coffee accessories presented in the same illy editorial style, with local availability guided by the store.",
-      image: "../assets/www.illy.com/on/demandware.static/-/Library-Sites-illySharedLibrarySFRA/default/dw0cd3fe9a/Menu_IAC_Genesi.d859a99276.jpg",
-      cta: ["Browse pickup shop", "shop.html"],
+
+    visit: {
+      active: "Visit Us",
+      title: "Visit illy Caffè National Harbor",
+      eyebrow: "Find us",
+      copy: "We're on the waterfront at National Harbor. Order ahead for pickup and skip the line, or stop by for espresso, breakfast and lunch. Payment is collected in store.",
+      image: PB + "bc04eca2-f0ad-4390-81be-4c01c618920f-retina-large.jpg",
+      cta: ["Order for pickup", "menu.html"],
       tiles: [
-        ["Gifts for Coffee Lovers", "Coffee classics and premium pairings."],
-        ["Machine Gifts & Bundles", "Machines paired with capsules."],
-        ["Coffee & Tea Accessories", "Cups, tools, and serving pieces."]
+        ["📍 138 Waterfront Street", "Oxon Hill, MD 20745"],
+        ["🕗 Online ordering", "8:00 AM – 6:10 PM daily"],
+        ["☎ Contact", "+1 (301) 500-1077"]
       ],
-      products: "all"
+      gridTitle: "Start your order",
+      gridItems: function () { return featured(["espresso-bar", "breakfast-sandwiches", "sweets", "sandwiches-lunch"], 8); }
     },
-    promotions: {
-      active: "Promotions",
-      title: "Promotions",
-      eyebrow: "Current offers",
-      copy: "A local promotions page that keeps customers inside the same illy-style shopping flow instead of sending them to unfinished external pages.",
-      image: "../assets/www.illy.com/livestory/video/illy/posts/orig/69e0fa124a2aedd4d1d953bb.8171f33675.jpg",
-      cta: ["Shop best sellers", "shop.html"],
+
+    rewards: {
+      active: "Rewards",
+      title: "illy Caffè Rewards",
+      eyebrow: "Loyalty & perks",
+      copy: "Earn on every pickup order and unlock free drinks, birthday treats and members-only perks. Three tiers, no card to carry — just order ahead and the rewards stack up.",
+      image: PB + "7d86b7c6-b3f1-46f7-8538-95acf6a17d76-retina-large.jpg",
+      cta: ["Start earning — order now", "menu.html"],
       tiles: [
-        ["Best Sellers", "Popular coffee and machines for pickup."],
-        ["Coffee Offers", "Featured blends and capsule options."],
-        ["Store Pickup", "Reserve online and collect locally."]
+        ["Earn points", "1 point for every $1 spent on pickup orders."],
+        ["Redeem", "Free drinks and food as your points grow."],
+        ["Member perks", "Birthday treat, early access, member pricing."]
       ],
-      products: "all"
+      content: function () {
+        var tiers = [
+          { id: "free", name: "Member", badge: "Free", price: "Free to join",
+            perks: ["Earn 1 point per $1", "Free birthday drink", "Order-ahead pickup"] },
+          { id: "gold", name: "Gold", badge: "100 pts / yr", price: "Reach 100 points",
+            perks: ["Everything in Member", "Free drink every 75 points", "Earn 1.25× points", "Skip-the-line pickup"], highlight: true },
+          { id: "vip", name: "VIP", badge: "300 pts / yr", price: "Reach 300 points",
+            perks: ["Everything in Gold", "Free drink every 50 points", "Earn 1.5× points", "Member pricing on retail beans", "First access to seasonal drinks"] }
+        ];
+        return '<div class="bx-tiers">' + tiers.map(function (t) {
+          return '<article class="bx-tier' + (t.highlight ? ' bx-tier--hl' : '') + '" id="' + t.id + '">' +
+            '<div class="bx-tier__badge">' + t.badge + '</div>' +
+            '<h3>' + t.name + '</h3>' +
+            '<p class="bx-tier__price">' + t.price + '</p>' +
+            '<ul>' + t.perks.map(function (p) { return '<li>' + p + '</li>'; }).join('') + '</ul>' +
+            '<a class="bx-btn bx-btn--full" href="menu.html">' + (t.highlight ? 'Join &amp; earn' : 'Get started') + '</a>' +
+          '</article>';
+        }).join('') + '</div>' +
+        '<p class="bx-fineprint">Rewards are earned on pickup orders placed through this site. Points and perks are illustrative for this branch preview.</p>';
+      }
     },
+
+    giftcards: {
+      active: "Gift Cards",
+      title: "illy Caffè Gift Cards",
+      eyebrow: "The gift of illy",
+      copy: "Give a little Italian coffee ritual. illy Caffè gift cards are perfect for the coffee lover in your life — redeemable on espresso, breakfast, lunch and sweets at our National Harbor café.",
+      image: PB + "20afbf30-27e1-4bc9-ab0c-a7103f166dc1-retina-large.jpg",
+      cta: ["Buy a gift card", "#buy"],
+      tiles: [
+        ["Any occasion", "Birthdays, thank-yous, or just because."],
+        ["Redeem in store", "Use toward any menu item at pickup."],
+        ["No expiration", "Spend it whenever the craving hits."]
+      ],
+      content: function () {
+        var amounts = [15, 25, 50, 100];
+        return '<div id="buy" class="bx-giftgrid">' + amounts.map(function (a) {
+          return '<article class="bx-giftcard">' +
+            '<div class="bx-giftcard__face"><span>illy Caffè</span><strong>$' + a + '</strong></div>' +
+            '<a class="bx-btn bx-btn--full" href="store.html#contact">Buy $' + a + ' card</a>' +
+          '</article>';
+        }).join('') + '</div>' +
+        '<div id="how" class="bx-howrow">' +
+          '<div><h3>1. Choose an amount</h3><p>Pick a value that suits the occasion.</p></div>' +
+          '<div><h3>2. We prepare it</h3><p>Pick up a physical card in store, ready to gift.</p></div>' +
+          '<div id="balance"><h3>3. Redeem &amp; check balance</h3><p>Use it on any order; ask our team to check the balance anytime.</p></div>' +
+        '</div>' +
+        '<p class="bx-fineprint">Gift cards are sold and redeemed in store at 138 Waterfront Street. Online purchase is illustrative for this branch preview.</p>';
+      }
+    },
+
+    story: {
+      active: "Visit Us",
+      title: "Our Story",
+      eyebrow: "illy Caffè National Harbor",
+      copy: "A neighborhood café on the National Harbor waterfront, pouring authentic illy espresso alongside fresh breakfast, lunch and house-made sweets. We bring the Italian café ritual to the DMV — one cup at a time.",
+      image: PB + "bc04eca2-f0ad-4390-81be-4c01c618920f-retina-large.jpg",
+      cta: ["See the menu", "menu.html"],
+      tiles: [
+        ["Authentic illy", "Proudly serving the illy 100% Arabica blend."],
+        ["Made fresh daily", "Breakfast, lunch and pastries prepared in house."],
+        ["On the waterfront", "138 Waterfront Street, National Harbor."]
+      ],
+      content: function () {
+        return '<div class="bx-prose">' +
+          '<h3>The Italian café ritual, on the Potomac</h3>' +
+          '<p>illy Caffè National Harbor was built around a simple idea: a great espresso, made properly, in a space that feels like a little corner of Italy. We pull every shot with the illy blend — a balanced 100% Arabica espresso known the world over for its smooth, aromatic crema.</p>' +
+          '<h3>More than coffee</h3>' +
+          '<p>Beyond the espresso bar, our kitchen turns out breakfast croissant sandwiches, avocado toast, lunch salads and focaccia sandwiches, fresh pasta, and a bakery case of cakes, eclairs and gelato — all made fresh and ready for pickup or to enjoy by the water.</p>' +
+          '<h3>Come say hello</h3>' +
+          '<p>Whether it&rsquo;s a morning cappuccino, a working lunch, or an afternoon affogato, you&rsquo;ll find us on the waterfront at National Harbor. Order ahead and skip the line, or stop in and let us pull one for you.</p>' +
+        '</div>';
+      }
+    },
+
     illyworld: {
-      active: "Illyworld",
-      title: "Illyworld",
+      active: "Visit Us",
+      title: "Illy World",
       eyebrow: "The world of illy",
-      copy: "A branded illyworld landing page for story, culture, sustainability, and art collection content, matching the same navigation and section template.",
-      image: "../assets/www.illy.com/livestory/video/illy/posts/orig/67a376d23c37f6ce48da7e4e.f76ca24d67.png",
-      cta: ["Visit our store", "store.html"],
+      copy: "Behind every cup is a story of quality, craft and culture. Explore what makes illy one of the most recognized names in coffee — the blend, the commitment to sustainability, and the art it inspires.",
+      image: PB + "b97ec77a-0889-4852-a4a3-a34e55b6e0cf-retina-large.jpg",
+      cta: ["Taste it for yourself", "menu.html"],
       tiles: [
-        ["Sustainability", "A long-term commitment to quality coffee."],
-        ["Art Collection", "Creative collaborations and collectible cups."],
-        ["Caffè Culture", "The illy experience in every detail."]
+        ["Our Coffee", "A single, unmistakable blend of 9 Arabicas."],
+        ["Quality", "Decades of research into the perfect cup."],
+        ["Sustainability", "A long-term commitment to growers and the planet."]
       ],
-      products: "coffee"
+      content: function () {
+        return '<div class="bx-prose">' +
+          '<h3>One blend, perfected</h3>' +
+          '<p>The illy blend brings together nine of the world&rsquo;s finest Arabicas into a single, consistent taste — smooth, full-bodied and aromatic, cup after cup. It&rsquo;s the espresso we&rsquo;re proud to serve at every visit.</p>' +
+          '<h3>A commitment to quality</h3>' +
+          '<p>illy has spent decades studying coffee — from green bean selection to roasting and extraction — through its own research and the Università del Caffè. That obsession with quality is what you taste in every shot.</p>' +
+          '<h3>Sustainability &amp; the art collection</h3>' +
+          '<p>illy works directly with growers to improve quality and sustainability, and celebrates coffee culture through the illy Art Collection — cups designed by artists from around the world. It&rsquo;s coffee as craft, and as culture.</p>' +
+        '</div>';
+      }
     }
   };
-  var data = sections[key] || sections.coffee;
-  var products = B.products.filter(function (p) {
-    return data.products === "all" || p.category === data.products;
-  }).slice(0, 4);
 
+  var data = SECTIONS[key] || SECTIONS.menu;
   document.title = data.title + " — illy Caffè National Harbor";
   B.renderChrome(data.active);
+
+  /* Build grid markup — grouped by category when requested, else a flat grid. */
+  function gridMarkup() {
+    if (data.groupByCategory) {
+      return M.categories
+        .filter(function (c) { return data.groupByCategory.indexOf(c.id) !== -1; })
+        .map(function (c) {
+          return '<section class="mn-cat" id="cat-' + c.id + '">' +
+            '<h2>' + c.name + '</h2><div class="mn-cat__rule"></div>' +
+            UI.itemsGridHTML(c.items) +
+          '</section>';
+        }).join('');
+    }
+    return UI.itemsGridHTML(data.gridItems());
+  }
+
+  /* Lower block: either a custom content panel (info pages) or the item grid. */
+  var lowerBlock = data.content
+    ? '<section class="bx-wrap bx-section-content">' + data.content() + '</section>'
+    : '<section class="bx-wrap bx-section-products">' +
+        '<div class="bx-section-title"><h2>' + data.gridTitle + '</h2><a href="menu.html">View full menu</a></div>' +
+        '<div id="section-grid">' + gridMarkup() + '</div>' +
+      '</section>';
 
   document.getElementById("section-root").innerHTML =
     '<section class="bx-section-hero">' +
       '<div class="bx-section-hero__copy">' +
-        '<nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>' + data.title + '</span></nav>' +
+        '<nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>' + data.active + '</span></nav>' +
         '<p class="bx-eyebrow">' + data.eyebrow + '</p>' +
         '<h1>' + data.title + '</h1>' +
         '<p>' + data.copy + '</p>' +
@@ -135,30 +279,14 @@
         }).join('') +
       '</div>' +
     '</section>' +
-    '<section class="bx-wrap bx-section-products">' +
-      '<div class="bx-section-title"><h2>Featured for pickup</h2><a href="shop.html">View all</a></div>' +
-      '<div class="bx-grid">' +
-        products.map(function (p) {
-          return '<article class="bx-card">' +
-            '<a class="bx-card__imgwrap" href="product.html?id=' + p.id + '"><img src="' + p.img + '" alt="' + p.name + '" loading="lazy"></a>' +
-            '<div class="bx-card__body">' +
-              (p.tag ? '<span class="bx-tag">' + p.tag + '</span>' : '') +
-              '<h2 class="bx-card__name"><a href="product.html?id=' + p.id + '">' + p.name + '</a></h2>' +
-              '<p class="bx-card__price">' + B.money(p.price) + '</p>' +
-              '<button class="bx-btn bx-btn--full" data-add="' + p.id + '">Add to pickup cart</button>' +
-            '</div>' +
-          '</article>';
-        }).join('') +
-      '</div>' +
-    '</section>';
+    lowerBlock;
 
-  document.getElementById("section-root").addEventListener("click", function (e) {
-    var btn = e.target.closest("[data-add]");
-    if (!btn) return;
-    B.cart.add(btn.getAttribute("data-add"), 1);
-    var p = B.findProduct(btn.getAttribute("data-add"));
-    B.toast("Added \"" + p.name.split(" - ")[0] + "\" to your pickup cart.");
-  });
+  /* Wire ordering (shared modal + click delegation) — only when a grid exists. */
+  var grid = document.getElementById("section-grid");
+  if (grid) {
+    UI.mountModal();
+    UI.bindGrid(grid);
+  }
 })();
 </script>
 </body>

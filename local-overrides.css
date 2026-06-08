@@ -502,3 +502,10 @@ header .cc-menu__footer {
   font-size: 10px;
   font-weight: 800;
 }
+
+/* Café nav: force-hide the inherited illy.com menu items that don't apply
+   (Promotions, Illy World, Reward Program, Professional). branch-overrides.js
+   adds .branch-nav-hidden to these; illy.com CSS forces display, so !important. */
+.cc-menu__item.branch-nav-hidden {
+  display: none !important;
+}

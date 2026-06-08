@@ -73,26 +73,89 @@
     document.body.style.paddingRight = "";
   }
 
+  /* Caf\u00e9 nav: relabel the inherited illy.com mega-menu first-level links into the
+     branch's core 6-item caf\u00e9 nav (Menu / Drinks / Food / Rewards / Gift Cards /
+     Visit Us), rewrite their destinations to the branch pages, and hide the items
+     that no longer apply. Our Story + Illy World live as links inside Visit Us. */
+  var CAFE_NAV_MAP = {
+    "SUBSCRIPTION":         { label: "Menu",       href: "pages/menu.html" },
+    "COFFEE":               { label: "Drinks",     href: "pages/section.html?cat=drinks" },
+    "COFFEE MACHINES":      { label: "Food",       href: "pages/section.html?cat=food" },
+    "REWARD PROGRAM":       { label: "Rewards",    href: "pages/section.html?cat=rewards" },
+    "GIFTS & ACCESSORIES":  { label: "Gift Cards", href: "pages/section.html?cat=giftcards" },
+    "PROMOTIONS":           { label: "Visit Us",   href: "pages/section.html?cat=visit" }
+  };
+  var CAFE_NAV_HIDE = ["ILLY WORLD", "PROFESSIONAL"];
+
   function cleanNavigation() {
-    var seenLabels = {};
+    var seen = {};
 
     document.querySelectorAll(".cc-menu__firstLevel").forEach(function (link) {
+      // Already converted to a caf\u00e9 nav link \u2014 leave it.
+      if (link.getAttribute("data-branch-nav") === "1") { return; }
+
       var label = link.textContent.replace(/\u200b/g, "").replace(/\s+/g, " ").trim();
       var normalized = label.toUpperCase();
+      var item = link.closest(".cc-menu__item");
 
-      link.querySelectorAll("span").forEach(function (span) {
-        span.textContent = span.textContent.replace(/\u200b/g, "").replace(/\s+/g, " ").trim();
-      });
-
-      if (normalized === "PROFESSIONAL" && seenLabels[normalized]) {
-        var item = link.closest(".cc-menu__item");
+      // Hide items that don't apply to a caf\u00e9 (or duplicates).
+      // Use !important + a class because illy.com's CSS forces display on these.
+      if (CAFE_NAV_HIDE.indexOf(normalized) !== -1 || seen[normalized]) {
         if (item) {
-          item.remove();
+          item.style.setProperty("display", "none", "important");
+          item.classList.add("branch-nav-hidden");
         }
         return;
       }
+      seen[normalized] = true;
 
-      seenLabels[normalized] = true;
+      // Relabel + repoint the kept items to the caf\u00e9 nav.
+      var map = CAFE_NAV_MAP[normalized];
+      if (map) {
+        var spans = link.querySelectorAll("span");
+        if (spans.length) {
+          spans.forEach(function (span, i) {
+            span.textContent = i === 0 ? map.label : "";
+          });
+        } else {
+          link.textContent = map.label;
+        }
+        link.setAttribute("href", map.href);
+        link.setAttribute("data-branch-nav", "1");
+        link.setAttribute("data-branch-label", map.label);
+        // Drop the inherited illy.com dropdown so the caf\u00e9 nav is a simple link.
+        if (item) {
+          var dd = item.querySelector(".cc-menu__dropdownMenu");
+          if (dd) { dd.remove(); }
+          item.classList.add("branch-nav-item");
+          item.setAttribute("data-branch-label", map.label);
+        }
+      } else {
+        // Any unmapped first-level item: tidy whitespace only.
+        link.querySelectorAll("span").forEach(function (span) {
+          span.textContent = span.textContent.replace(/\u200b/g, "").replace(/\s+/g, " ").trim();
+        });
+      }
+    });
+
+    reorderCafeNav();
+  }
+
+  /* The homepage's source slots aren't in caf\u00e9 order, so reorder the relabeled
+     items into the canonical sequence to match the branch pages. */
+  var CAFE_NAV_ORDER = ["Menu", "Drinks", "Food", "Rewards", "Gift Cards", "Visit Us"];
+  function reorderCafeNav() {
+    var items = Array.prototype.slice.call(
+      document.querySelectorAll(".cc-menu__item[data-branch-label]")
+    );
+    if (items.length < 2) { return; }
+    var parent = items[0].parentNode;
+    if (!parent) { return; }
+    CAFE_NAV_ORDER.forEach(function (label) {
+      var match = items.filter(function (it) {
+        return it.getAttribute("data-branch-label") === label;
+      })[0];
+      if (match) { parent.appendChild(match); }
     });
   }
 
@@ -381,18 +444,21 @@
       return "pages/product.html?id=" + sku; // PDP page handles unknown ids gracefully
     }
 
-    // Category / listing pages -> our shop, filtered.
-    if (/^coffee-machines/.test(path)) return "pages/section.html?cat=machines";
-    if (/^coffee(\/|$)/.test(path)) return "pages/section.html?cat=coffee";
-    if (/^coffee-delivery|^subscription/.test(path)) return "pages/section.html?cat=subscriptions";
-    if (/^coffee-gifts|all-accessories|art-collection|^art(\/|$)|^machine-gifts|^hosting-gifts/.test(path)) return "pages/section.html?cat=gifts";
-    if (/^coffee-offers|^promotion|^promotions|^sale|^offers/.test(path)) return "pages/section.html?cat=promotions";
-    if (/^quality|^universita-del-caffe|^illy-world|^illyworld|^illy-mission|^company|^sustainability|^live-happilly/.test(path)) return "pages/section.html?cat=illyworld";
+    // Category / listing pages -> our café sections.
+    // Anything coffee/espresso/drink related -> Drinks.
+    if (/^coffee-machines/.test(path)) return "pages/section.html?cat=drinks";
+    if (/^coffee(\/|$)|^coffee-delivery|^subscription|^espresso|^drinks?/.test(path)) return "pages/section.html?cat=drinks";
+    // Food / gifts / accessories / promotions -> Food.
+    if (/^coffee-gifts|all-accessories|art-collection|^art(\/|$)|^machine-gifts|^hosting-gifts|^coffee-offers|^promotion|^promotions|^sale|^offers|^food|^breakfast|^lunch/.test(path)) return "pages/section.html?cat=food";
+    // Brand / story / company -> Visit Us.
+    if (/^quality|^universita-del-caffe|^illy-world|^illyworld|^illy-mission|^company|^sustainability|^live-happilly/.test(path)) return "pages/section.html?cat=visit";
+    // Generic menu entry point.
+    if (/^menu|^order/.test(path)) return "pages/menu.html";
 
     // Store / service.
     if (/^customer-care|^contact/.test(path)) return "pages/store.html#contact";
     if (/^cart$/.test(path)) return "pages/cart.html";
-    if (/^shop|^store|location/.test(path)) return "pages/store.html";
+    if (/^shop|^store|location/.test(path)) return "pages/section.html?cat=visit";
 
     return null;
   }
@@ -532,6 +598,8 @@
     window.setTimeout(removeInjectedOverlays, 500);
     window.setTimeout(removeInjectedOverlays, 1500);
     window.setTimeout(cleanNavigation, 500);
+    window.setTimeout(cleanNavigation, 1500);
+    window.setTimeout(cleanNavigation, 3000);
     window.setTimeout(eagerLoadImages, 500);
     window.setTimeout(removeEmptyEmbeds, 500);
     window.setTimeout(removeEmptyEmbeds, 1500);
@@ -557,6 +625,7 @@
     }
     window.__illyLinkObserver = new MutationObserver(function () {
       setupLinkStrategy();
+      cleanNavigation();
     });
     window.__illyLinkObserver.observe(document.documentElement, {
       childList: true,

@@ -21,6 +21,8 @@
 <script src="../branch-config.js"></script>
 <script src="catalog.js"></script>
 <script src="branch.js"></script>
+<script src="menu.js"></script>
+<script src="menu-cart.js"></script>
 <script>
 (function () {
   var B = window.ILLY_BRANCH, store = window.ILLY_BRANCH.store || {};
@@ -29,7 +31,7 @@
   var items = B.cart.items();
 
   if (!items.length) {
-    root.innerHTML = '<div class="bx-empty"><p>Your pickup cart is empty.</p><a class="bx-btn" href="shop.html">Start browsing</a></div>';
+    root.innerHTML = '<div class="bx-empty"><p>Your pickup cart is empty.</p><a class="bx-btn" href="menu.html">Start your order</a></div>';
     return;
   }
 
@@ -66,7 +68,7 @@
         '<h1 style="margin:0 0 10px">You’re all set, ' + name + '!</h1>' +
         '<p>Your order is reserved for pickup at ' + (store.name || 'our store') + '.<br>Reference <strong>' + ref + '</strong>. We’ll have it ready — pay when you arrive.</p>' +
         '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">' +
-          '<a class="bx-btn" href="shop.html">Browse more</a>' +
+          '<a class="bx-btn" href="menu.html">Browse menu</a>' +
           '<a class="bx-btn bx-btn--ghost" href="store.html">Store info &amp; directions</a>' +
         '</div>' +
       '</div>';

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Online — illy Caffè National Harbor</title>
+<meta name="description" content="Order illy Caffè breakfast, lunch, espresso, gelato and more for pickup at National Harbor.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="branch.css">
+<link rel="stylesheet" href="menu.css">
+</head>
+<body>
+<div data-chrome-header></div>
+
+<main class="bx-wrap">
+  <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>Order Online</span></nav>
+  <div class="bx-pagehead">
+    <h1>Order Online</h1>
+    <p>Browse the full illy Caffè menu and reserve for pickup at our National Harbor café. Prices are our in-café prices. Payment is collected when you arrive.</p>
+  </div>
+  <div class="mn-layout">
+    <nav class="mn-rail" id="mn-rail" aria-label="Menu categories"></nav>
+    <div id="mn-cats"></div>
+  </div>
+</main>
+
+<!-- Customization modal is injected by menu-ui.js (B.MENU_UI.mountModal) -->
+
+<div data-chrome-footer></div>
+
+<script src="../branch-config.js"></script>
+<script src="catalog.js"></script>
+<script src="branch.js"></script>
+<script src="menu.js"></script>
+<script src="menu-cart.js"></script>
+<script src="menu-ui.js"></script>
+<script>
+(function () {
+  var B = window.ILLY_BRANCH, M = window.ILLY_MENU, UI = B.MENU_UI;
+  document.title = "Order Online — illy Caffè National Harbor";
+  B.renderChrome("Menu");
+
+  var cats = M.categories;
+  var rail = document.getElementById("mn-rail");
+  var catsRoot = document.getElementById("mn-cats");
+
+  /* ---- Category rail ---- */
+  rail.innerHTML = '<h2>Menu</h2>' + cats.map(function (c) {
+    return '<a href="#cat-' + c.id + '" data-rail="' + c.id + '">' + c.name + '</a>';
+  }).join('');
+
+  /* ---- Category sections (item cards via shared UI module) ---- */
+  catsRoot.innerHTML = cats.map(function (c) {
+    return '<section class="mn-cat" id="cat-' + c.id + '">' +
+      '<h2>' + c.name + '</h2><div class="mn-cat__rule"></div>' +
+      UI.itemsGridHTML(c.items) +
+    '</section>';
+  }).join('');
+
+  /* ---- Active rail highlighting on scroll ---- */
+  var sections = cats.map(function (c) { return document.getElementById("cat-" + c.id); });
+  var railLinks = {};
+  cats.forEach(function (c) { railLinks[c.id] = rail.querySelector('[data-rail="' + c.id + '"]'); });
+  function onScroll() {
+    var y = window.scrollY + 120, current = cats[0].id;
+    sections.forEach(function (s, i) { if (s && s.offsetTop <= y) current = cats[i].id; });
+    Object.keys(railLinks).forEach(function (id) {
+      railLinks[id].classList.toggle("is-active", id === current);
+    });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  /* ---- Ordering: shared modal + click handling ---- */
+  UI.mountModal();
+  UI.bindGrid(catsRoot);
+})();
+</script>
+</body>
+</html>
