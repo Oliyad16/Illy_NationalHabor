@@ -75,95 +75,104 @@
   };
 
   /* ---------- Header / footer ---------- */
-  /* Real café food photos (local copies in assets/menu-photos/) for mega-menu features.
-     branch.js only runs from /pages/, so the path is prefixed with ../ */
-  var PB = "../assets/menu-photos/";
+  function isPagesRoute() {
+    return window.location.pathname.indexOf("/pages/") !== -1;
+  }
+  function rootPath(path) {
+    return (isPagesRoute() ? "../" : "") + path;
+  }
+  function pagePath(path) {
+    return (isPagesRoute() ? "" : "pages/") + path;
+  }
+
+  /* Real café food photos (local copies in assets/menu-photos/) for mega-menu features. */
+  var PB = rootPath("assets/menu-photos/");
 
   var NAV = [
     {
       label: "Menu",
       active: "Menu",
-      href: "section.html?cat=menu",
+      href: pagePath("menu.html"),
       links: [
-        ["Full Menu", "menu.html"],
-        ["Breakfast & Brunch", "section.html?cat=food#breakfast"],
-        ["Lunch", "section.html?cat=food#lunch"],
-        ["Drinks", "section.html?cat=drinks"],
-        ["Sweets & Bakery", "section.html?cat=food#sweets"]
+        ["Full Menu", pagePath("menu.html")],
+        ["Breakfast & Brunch", pagePath("section.html?cat=food#breakfast")],
+        ["Lunch", pagePath("section.html?cat=food#lunch")],
+        ["Drinks", pagePath("section.html?cat=drinks")],
+        ["Sweets & Bakery", pagePath("section.html?cat=food#sweets")]
       ],
       feature: ["Order for pickup", PB + "7d86b7c6-b3f1-46f7-8538-95acf6a17d76-retina-large.jpg"]
     },
     {
       label: "Drinks",
       active: "Drinks",
-      href: "section.html?cat=drinks",
+      href: pagePath("section.html?cat=drinks"),
       links: [
-        ["Espresso Bar (Hot & Cold)", "menu.html#cat-espresso-bar"],
-        ["Small Espresso Drinks", "menu.html#cat-small-espresso-drinks"],
-        ["Tea Lattes", "menu.html#cat-tea-lattes"],
-        ["Gelato", "menu.html#cat-gelato"],
-        ["Brewed Coffee & Hot Chocolate", "menu.html#cat-brewed-coffee"]
+        ["Espresso Bar (Hot & Cold)", pagePath("menu.html#cat-espresso-bar")],
+        ["Small Espresso Drinks", pagePath("menu.html#cat-small-espresso-drinks")],
+        ["Tea Lattes", pagePath("menu.html#cat-tea-lattes")],
+        ["Gelato", pagePath("menu.html#cat-gelato")],
+        ["Brewed Coffee & Hot Chocolate", pagePath("menu.html#cat-brewed-coffee")]
       ],
       feature: ["illy espresso, hot & cold", PB + "20afbf30-27e1-4bc9-ab0c-a7103f166dc1-retina-large.jpg"]
     },
     {
       label: "Food",
       active: "Food",
-      href: "section.html?cat=food",
+      href: pagePath("section.html?cat=food"),
       links: [
-        ["Breakfast Sandwiches", "menu.html#cat-breakfast-sandwiches"],
-        ["Bagels & Avocado Toasts", "menu.html#cat-bagels"],
-        ["Salads & Lunch Sandwiches", "menu.html#cat-salads-lunch"],
-        ["Pasta", "menu.html#cat-pasta-lunch"],
-        ["Sweets & Bakery", "menu.html#cat-bakery-pastries"]
+        ["Breakfast Sandwiches", pagePath("menu.html#cat-breakfast-sandwiches")],
+        ["Bagels & Avocado Toasts", pagePath("menu.html#cat-bagels")],
+        ["Salads & Lunch Sandwiches", pagePath("menu.html#cat-salads-lunch")],
+        ["Pasta", pagePath("menu.html#cat-pasta-lunch")],
+        ["Sweets & Bakery", pagePath("menu.html#cat-bakery-pastries")]
       ],
       feature: ["Fresh, made to order", PB + "b97ec77a-0889-4852-a4a3-a34e55b6e0cf-retina-large.jpg"]
     },
     {
       label: "Rewards",
       active: "Rewards",
-      href: "section.html?cat=rewards",
+      href: pagePath("section.html?cat=rewards"),
       links: [
-        ["How Rewards Work", "section.html?cat=rewards"],
-        ["Free Tier", "section.html?cat=rewards#free"],
-        ["Gold Tier", "section.html?cat=rewards#gold"],
-        ["VIP Tier", "section.html?cat=rewards#vip"],
-        ["Join & Earn", "menu.html"]
+        ["How Rewards Work", pagePath("section.html?cat=rewards")],
+        ["Free Tier", pagePath("section.html?cat=rewards#free")],
+        ["Gold Tier", pagePath("section.html?cat=rewards#gold")],
+        ["VIP Tier", pagePath("section.html?cat=rewards#vip")],
+        ["Join & Earn", pagePath("menu.html")]
       ],
       feature: ["Earn on every pickup", PB + "7d86b7c6-b3f1-46f7-8538-95acf6a17d76-retina-large.jpg"]
     },
     {
       label: "Gift Cards",
       active: "Gift Cards",
-      href: "section.html?cat=giftcards",
+      href: pagePath("section.html?cat=giftcards"),
       links: [
-        ["Buy a Gift Card", "section.html?cat=giftcards"],
-        ["Check Balance", "section.html?cat=giftcards#balance"],
-        ["How It Works", "section.html?cat=giftcards#how"]
+        ["Buy a Gift Card", pagePath("section.html?cat=giftcards")],
+        ["Check Balance", pagePath("section.html?cat=giftcards#balance")],
+        ["How It Works", pagePath("section.html?cat=giftcards#how")]
       ],
       feature: ["The gift of illy", PB + "20afbf30-27e1-4bc9-ab0c-a7103f166dc1-retina-large.jpg"]
     },
     {
       label: "Visit Us",
       active: "Visit Us",
-      href: "section.html?cat=visit",
+      href: pagePath("section.html?cat=visit"),
       links: [
-        ["Hours & Location", "store.html"],
-        ["Order for Pickup", "menu.html"],
-        ["Our Story", "section.html?cat=story"],
-        ["Illy World", "section.html?cat=illyworld"],
-        ["Contact", "store.html#contact"]
+        ["Hours & Location", pagePath("store.html")],
+        ["Order for Pickup", pagePath("menu.html")],
+        ["Our Story", pagePath("section.html?cat=story")],
+        ["Illy World", pagePath("section.html?cat=illyworld")],
+        ["Contact", pagePath("store.html#contact")]
       ],
       feature: ["138 Waterfront Street", PB + "bc04eca2-f0ad-4390-81be-4c01c618920f-retina-large.jpg"]
     }
   ];
 
   B.renderChrome = function (active) {
-    var logo = "../assets/www.illy.com/on/demandware.static/Sites-illy_US_SFRA-Site/-/default/dwa1d7fec0/images/logo-illy.0d478fb603.svg";
+    var logo = rootPath("assets/www.illy.com/on/demandware.static/Sites-illy_US_SFRA-Site/-/default/dwa1d7fec0/images/logo-illy.0d478fb603.svg");
     var header =
-      '<div class="bx-topbar">Order online &amp; pay securely with Toast &nbsp;|&nbsp; Pickup at 138 Waterfront Street, National Harbor</div>' +
+      '<div class="bx-topbar">Order online with Toast &nbsp;|&nbsp; National Harbor pickup</div>' +
       '<header class="bx-header">' +
-        '<a class="bx-header__brand" href="../index.html">' +
+        '<a class="bx-header__brand" href="' + rootPath("index.html") + '">' +
           '<img src="' + logo + '" alt="illy" />' +
         '</a>' +
         '<nav class="bx-nav">' +
@@ -186,8 +195,8 @@
           }).join('') +
         '</nav>' +
         '<div class="bx-header__right">' +
-          '<a class="bx-btn" href="menu.html" style="padding:9px 16px;font-size:13px">Order Online</a>' +
-          '<a class="bx-cartlink" href="cart.html">Cart' +
+          '<a class="bx-btn" href="' + pagePath("menu.html") + '" style="padding:9px 16px;font-size:13px">Order Online</a>' +
+          '<a class="bx-cartlink" href="' + pagePath("cart.html") + '">Cart' +
             '<span class="bx-cartlink__count" data-cart-count>0</span>' +
           '</a>' +
         '</div>' +
@@ -198,23 +207,23 @@
         '<div class="bx-footer__inner">' +
           '<div>' +
             '<h3>Order</h3>' +
-            '<a href="menu.html">Full Menu</a>' +
-            '<a href="section.html?cat=drinks">Drinks</a>' +
-            '<a href="section.html?cat=food">Food</a>' +
-            '<a href="menu.html">Order for Pickup</a>' +
-            '<a href="cart.html">Your Pickup Cart</a>' +
+            '<a href="' + pagePath("menu.html") + '">Full Menu</a>' +
+            '<a href="' + pagePath("section.html?cat=drinks") + '">Drinks</a>' +
+            '<a href="' + pagePath("section.html?cat=food") + '">Food</a>' +
+            '<a href="' + pagePath("menu.html") + '">Order for Pickup</a>' +
+            '<a href="' + pagePath("cart.html") + '">Your Pickup Cart</a>' +
           '</div>' +
           '<div>' +
             '<h3>More</h3>' +
-            '<a href="section.html?cat=rewards">Rewards</a>' +
-            '<a href="section.html?cat=giftcards">Gift Cards</a>' +
-            '<a href="section.html?cat=story">Our Story</a>' +
-            '<a href="section.html?cat=illyworld">Illy World</a>' +
+            '<a href="' + pagePath("section.html?cat=rewards") + '">Rewards</a>' +
+            '<a href="' + pagePath("section.html?cat=giftcards") + '">Gift Cards</a>' +
+            '<a href="' + pagePath("section.html?cat=story") + '">Our Story</a>' +
+            '<a href="' + pagePath("section.html?cat=illyworld") + '">Illy World</a>' +
           '</div>' +
           '<div>' +
             '<h3>Visit Us</h3>' +
-            '<a href="store.html">Store &amp; Hours</a>' +
-            '<a href="store.html#contact">Contact</a>' +
+            '<a href="' + pagePath("store.html") + '">Store &amp; Hours</a>' +
+            '<a href="' + pagePath("store.html#contact") + '">Contact</a>' +
             '<a href="tel:' + (store.phoneHref || '') + '">' + (store.phoneDisplay || '') + '</a>' +
           '</div>' +
           '<div>' +
