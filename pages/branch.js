@@ -68,9 +68,9 @@
   };
 
   /* ---------- Header / footer ---------- */
-  /* Real café food photos (DoorDash storefront CDN) used for mega-menu features. */
-  var PB = "https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1200,height=672,format=auto/" +
-           "https://doordash-static.s3.amazonaws.com/media/photosV2/";
+  /* Real café food photos (local copies in assets/menu-photos/) for mega-menu features.
+     branch.js only runs from /pages/, so the path is prefixed with ../ */
+  var PB = "../assets/menu-photos/";
 
   var NAV = [
     {

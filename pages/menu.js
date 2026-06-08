@@ -26,12 +26,12 @@ window.ILLY_MENU.store = {
 };
 
 /* Real item photos. Two sources:
-     - `photo`  : DoorDash storefront CDN GUID (food/drink photos), expanded via photoBase.
+     - `photo`  : a local copy of the original DoorDash item photo (food/drink),
+                  stored in assets/menu-photos/ and expanded via photoBase.
      - `img`    : a full URL (e.g. official illy.com product images reused for retail machines).
-   Items with neither fall back to a placeholder in the UI. */
-window.ILLY_MENU.photoBase =
-  "https://img.cdn4dd.com/cdn-cgi/image/fit=contain,width=1200,height=672,format=auto/" +
-  "https://doordash-static.s3.amazonaws.com/media/photosV2/";
+   Items with neither fall back to a placeholder in the UI.
+   Path is relative to /pages/, so prefixed with ../ */
+window.ILLY_MENU.photoBase = "../assets/menu-photos/";
 window.ILLY_MENU.photoUrl = function (item) {
   if (!item) return null;
   if (item.img) return item.img;
