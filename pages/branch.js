@@ -254,6 +254,50 @@
   }
   B.renderCartCount = renderCartCount;
 
+  function normalizeFluidButton(btn) {
+    if (!btn || btn.dataset.fluidReady === "1") return;
+    btn.dataset.fluidReady = "1";
+    if (!btn.querySelector(".bx-btn__label")) {
+      var nodes = Array.prototype.slice.call(btn.childNodes);
+      var label = document.createElement("span");
+      label.className = "bx-btn__label";
+      nodes.forEach(function (node) { label.appendChild(node); });
+      btn.appendChild(label);
+    }
+  }
+
+  function setFluidState(el, isOver) {
+    if (!el) return;
+    normalizeFluidButton(el.classList.contains("bx-btn") ? el : null);
+    el.classList.toggle("bx-btn-mouseover", isOver);
+    el.classList.toggle("bx-btn__mouseover", isOver);
+    el.classList.toggle("bx-btn-mouseout", !isOver);
+    el.classList.toggle("bx-btn__mouseout", !isOver);
+  }
+
+  function fluidTarget(e) {
+    var btn = e.target.closest && e.target.closest(".bx-btn");
+    if (btn) return btn;
+    var item = e.target.closest && e.target.closest(".mn-item");
+    return item ? item.querySelector(".mn-item__add") : null;
+  }
+
+  document.addEventListener("pointerover", function (e) {
+    var target = fluidTarget(e);
+    if (!target || (e.relatedTarget && target.contains(e.relatedTarget))) return;
+    setFluidState(target, true);
+  });
+
+  document.addEventListener("pointerout", function (e) {
+    var target = fluidTarget(e);
+    if (!target || (e.relatedTarget && target.contains(e.relatedTarget))) return;
+    setFluidState(target, false);
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".bx-btn").forEach(normalizeFluidButton);
+  });
+
   /* expose for inline onclick handlers */
   window.ILLY_BRANCH = B;
 })();
