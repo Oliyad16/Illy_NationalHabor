@@ -196,6 +196,7 @@
         '</nav>' +
         '<div class="bx-header__right">' +
           '<a class="bx-btn" href="' + pagePath("menu.html") + '" style="padding:9px 16px;font-size:13px">Order Online</a>' +
+          '<a class="bx-cartlink" href="' + pagePath("account.html") + '">Account</a>' +
           '<a class="bx-cartlink" href="' + pagePath("cart.html") + '">Cart' +
             '<span class="bx-cartlink__count" data-cart-count>0</span>' +
           '</a>' +
@@ -219,6 +220,7 @@
             '<a href="' + pagePath("section.html?cat=giftcards") + '">Gift Cards</a>' +
             '<a href="' + pagePath("section.html?cat=story") + '">Our Story</a>' +
             '<a href="' + pagePath("section.html?cat=illyworld") + '">Illy World</a>' +
+            '<a href="' + pagePath("account.html") + '">Account</a>' +
           '</div>' +
           '<div>' +
             '<h3>Visit Us</h3>' +

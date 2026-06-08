@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account — illy Caffè National Harbor</title>
+<meta name="description" content="Create or sign in to an illy Caffè National Harbor account preview for rewards, preferences, and order history.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="branch.css">
+<style>
+  .acct-layout {
+    display: grid;
+    grid-template-columns: minmax(300px, .9fr) 1.1fr;
+    gap: 34px;
+    align-items: start;
+  }
+  .acct-panel {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    padding: 28px;
+  }
+  .acct-panel h2 { margin: 0 0 10px; color: var(--brown); font-size: 24px; font-weight: 500; }
+  .acct-panel p { margin: 0 0 22px; color: #66554a; line-height: 1.55; }
+  .acct-form { display: grid; gap: 14px; }
+  .acct-field label { display: block; margin-bottom: 7px; color: var(--brown); font-size: 13px; font-weight: 800; }
+  .acct-field input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px 13px;
+    font: inherit;
+  }
+  .acct-note {
+    border-left: 4px solid var(--red);
+    background: var(--cream);
+    padding: 16px;
+    color: #4f3f35;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .acct-benefits { display: grid; gap: 16px; }
+  .acct-benefit { padding: 20px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .acct-benefit strong { display: block; color: var(--brown); margin-bottom: 7px; }
+  .acct-benefit span { display: block; color: #66554a; font-size: 14px; line-height: 1.5; }
+  @media (max-width: 860px) {
+    .acct-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div data-chrome-header></div>
+
+<main class="bx-wrap">
+  <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>Account</span></nav>
+  <div class="bx-pagehead">
+    <p class="bx-eyebrow">Account preview</p>
+    <h1>Create your illy National Harbor account</h1>
+    <p>Use this screen as the customer-facing account design. Secure account creation will be connected to backend authentication before accepting real customer credentials.</p>
+  </div>
+
+  <div class="acct-layout">
+    <section class="acct-panel">
+      <h2>Join or sign in</h2>
+      <p>Accounts will support saved preferences, rewards, order history, and future Toast-linked pickup records.</p>
+      <form class="acct-form" action="#" id="account-form">
+        <div class="acct-field">
+          <label for="acct-name">Name</label>
+          <input id="acct-name" autocomplete="name" placeholder="Full name">
+        </div>
+        <div class="acct-field">
+          <label for="acct-email">Email</label>
+          <input id="acct-email" type="email" autocomplete="email" placeholder="you@example.com">
+        </div>
+        <div class="acct-field">
+          <label for="acct-phone">Phone</label>
+          <input id="acct-phone" autocomplete="tel" placeholder="+1">
+        </div>
+        <button class="bx-btn bx-btn--full" type="submit">Continue</button>
+      </form>
+      <div class="acct-note" style="margin-top:18px">
+        This preview does not store passwords or customer data. Real authentication should use Clerk/Auth0 plus a database and server-side route protection.
+      </div>
+    </section>
+
+    <section class="acct-benefits" aria-label="Account benefits">
+      <div class="acct-benefit">
+        <strong>Saved café preferences</strong>
+        <span>Favorite drinks, milk choices, syrups, pickup notes, and contact details.</span>
+      </div>
+      <div class="acct-benefit">
+        <strong>Rewards-ready profile</strong>
+        <span>Free, Gold, and VIP reward experiences can live behind a secure login.</span>
+      </div>
+      <div class="acct-benefit">
+        <strong>Toast order connection</strong>
+        <span>Future backend work can map site accounts to Toast order IDs and pickup records.</span>
+      </div>
+      <div class="acct-benefit">
+        <strong>Admin and staff roles</strong>
+        <span>The same auth foundation supports protected admin dashboard access later.</span>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div data-chrome-footer></div>
+
+<script src="../branch-config.js"></script>
+<script src="catalog.js"></script>
+<script src="branch.js"></script>
+<script>
+(function () {
+  var B = window.ILLY_BRANCH;
+  B.renderChrome("Account");
+  document.getElementById("account-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    B.toast("Account creation needs secure backend auth before collecting real customer data.");
+  });
+})();
+</script>
+</body>
+</html>

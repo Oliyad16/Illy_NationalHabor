@@ -312,9 +312,9 @@ img { max-width: 100%; display: block; }
   .bx-cart-row__price, .bx-cart-row__line { grid-column: 2 / -1; font-size: 13px; }
   .bx-topbar { width: 100vw; max-width: 100vw; font-size: 11px; line-height: 1.35; overflow-wrap: anywhere; white-space: normal; }
   .bx-header { width: 100vw; max-width: 100vw; padding: 16px; gap: 14px; overflow: hidden; }
-  .bx-header__right { width: 100%; gap: 10px; justify-content: space-between; }
-  .bx-header__right .bx-btn { flex: 1 1 auto; min-width: 0; }
-  .bx-cartlink { flex: 0 0 auto; }
+  .bx-header__right { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .bx-header__right .bx-btn { grid-column: 1 / -1; width: 100%; min-width: 0; }
+  .bx-cartlink { text-align: center; padding: 4px 0; }
   .bx-nav { min-width: 0; width: 100%; }
   .bx-nav__link { font-size: 12px; }
   .bx-section-hero__copy { padding: 34px 20px 42px; }
