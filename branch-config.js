@@ -1,10 +1,11 @@
 window.BRANCH_CONFIG = {
-  name: "Illy Cafe dmv — National Harbor",
-  phoneDisplay: "+1 (877) 469-4559",
-  phoneHref: "+18774694559",
+  name: "illy Caffè — National Harbor",
+  phoneDisplay: "+1 (301) 500-1077",
+  phoneHref: "+13015001077",
   addressLines: [
-    "138 Waterfront St",
+    "138 Waterfront Street",
     "Oxon Hill, MD 20745"
   ],
-  hours: "Open daily · Closes 7:00 PM"
+  hours: "Online ordering 8:00 AM – 6:10 PM",
+  toastOrderUrl: "https://order.toasttab.com/online/illy-caffe-oxon-hill?diningOption=takeout"
 };

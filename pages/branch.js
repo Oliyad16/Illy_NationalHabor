@@ -52,6 +52,13 @@
     return "$" + n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
+  B.toastOrderUrl = function () {
+    var menuStore = window.ILLY_MENU && window.ILLY_MENU.store;
+    return (menuStore && menuStore.orderUrl) ||
+      store.toastOrderUrl ||
+      "https://order.toasttab.com/online/illy-caffe-oxon-hill?diningOption=takeout";
+  };
+
   /* ---------- Toast ---------- */
   B.toast = function (msg) {
     var t = document.querySelector(".bx-toast");
@@ -154,7 +161,7 @@
   B.renderChrome = function (active) {
     var logo = "../assets/www.illy.com/on/demandware.static/Sites-illy_US_SFRA-Site/-/default/dwa1d7fec0/images/logo-illy.0d478fb603.svg";
     var header =
-      '<div class="bx-topbar">Order online &amp; skip the line &nbsp;|&nbsp; Pickup at 138 Waterfront Street, National Harbor</div>' +
+      '<div class="bx-topbar">Order online &amp; pay securely with Toast &nbsp;|&nbsp; Pickup at 138 Waterfront Street, National Harbor</div>' +
       '<header class="bx-header">' +
         '<a class="bx-header__brand" href="../index.html">' +
           '<img src="' + logo + '" alt="illy" />' +
@@ -216,7 +223,7 @@
             '<span style="display:block;font-size:14px;color:#3d2b1f">' + (store.hours || '') + '</span>' +
           '</div>' +
         '</div>' +
-        '<div class="bx-footer__legal">© illy Caffè — National Harbor branch. Independent local store site. Order online, collect in store.</div>' +
+        '<div class="bx-footer__legal">© illy Caffè — National Harbor branch. Online payments and POS order submission are handled by Toast.</div>' +
       '</footer>';
 
     var host = document.querySelector("[data-chrome-header]");

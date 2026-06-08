@@ -15,7 +15,7 @@
   <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>Pickup Cart</span></nav>
   <div class="bx-pagehead">
     <h1>Your Pickup Cart</h1>
-    <p>Review your order, then reserve it for in-store pickup at our National Harbor location. You’ll pay when you collect.</p>
+    <p>Review your local order draft, then complete online payment through Toast. Toast is the source of truth for the final paid order and POS/kiosk submission.</p>
   </div>
   <div id="cart-root"></div>
 </main>
@@ -58,9 +58,9 @@
         '<div class="bx-cart-total">Total: ' + B.money(B.cart.total()) + '</div>' +
         '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
           '<a class="bx-btn bx-btn--ghost" href="menu.html">Keep browsing</a>' +
-          '<button class="bx-btn bx-btn--lg" id="reserve">Reserve for in-store pickup</button>' +
+          '<button class="bx-btn bx-btn--lg" id="reserve">Continue to Toast checkout</button>' +
         '</div>' +
-        '<p style="font-size:13px;color:#8a7a6e;max-width:420px;text-align:right;margin:4px 0 0">Reserving holds your items for pickup at National Harbor. Payment is collected in store.</p>' +
+        '<p style="font-size:13px;color:#8a7a6e;max-width:460px;text-align:right;margin:4px 0 0">You may need to confirm or reselect items in Toast before paying. A native cart sync requires Toast API ordering credentials.</p>' +
       '</div>';
   }
 

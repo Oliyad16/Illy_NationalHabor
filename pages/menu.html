@@ -17,7 +17,11 @@
   <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>Order Online</span></nav>
   <div class="bx-pagehead">
     <h1>Order Online</h1>
-    <p>Browse the full illy Caffè menu and reserve for pickup at our National Harbor café. Prices are our in-café prices. Payment is collected when you arrive.</p>
+    <p>Browse the full illy Caffè menu for National Harbor. Build a quick local order, then finish payment securely through Toast so the order reaches the café POS.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0">
+      <a class="bx-btn bx-btn--lg" id="toast-order-link" href="#">Pay/order with Toast</a>
+      <a class="bx-btn bx-btn--ghost bx-btn--lg" href="cart.html">View local cart</a>
+    </div>
   </div>
   <div class="mn-layout">
     <nav class="mn-rail" id="mn-rail" aria-label="Menu categories"></nav>
@@ -40,6 +44,7 @@
   var B = window.ILLY_BRANCH, M = window.ILLY_MENU, UI = B.MENU_UI;
   document.title = "Order Online — illy Caffè National Harbor";
   B.renderChrome("Menu");
+  document.getElementById("toast-order-link").href = B.toastOrderUrl();
 
   var cats = M.categories;
   var rail = document.getElementById("mn-rail");
