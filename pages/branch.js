@@ -174,6 +174,7 @@
       '<header class="bx-header">' +
         '<a class="bx-header__brand" href="' + rootPath("index.html") + '">' +
           '<img src="' + logo + '" alt="illy" />' +
+          '<span>National Harbor</span>' +
         '</a>' +
         '<nav class="bx-nav">' +
           NAV.map(function (n) {

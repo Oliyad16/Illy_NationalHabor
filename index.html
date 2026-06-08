@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>illy Caffè National Harbor</title>
-<meta name="description" content="illy Caffè National Harbor. Explore espresso drinks, breakfast, lunch, rewards, gift cards, and pickup ordering.">
+<title>illy Caffe National Harbor</title>
+<meta name="description" content="illy Caffe National Harbor. Explore espresso drinks, breakfast, lunch, rewards, gift cards, and pickup ordering.">
 <link rel="canonical" href="https://www.illynationalharbor.com/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,11 +12,12 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/www.illy.com/on/demandware.static/Sites-illy_US_SFRA-Site/-/default/dw395ffb77/images/favicons/favicon-32x32.b08003ae3f.png">
 <link rel="stylesheet" href="pages/branch.css">
 <style>
+  body { background: #fffaf6; }
   .premium-hero {
     display: grid;
-    grid-template-columns: minmax(330px, 520px) 1fr;
-    min-height: 600px;
-    background: #f6f1ec;
+    grid-template-columns: minmax(340px, 43vw) 1fr;
+    min-height: min(720px, calc(100vh - 138px));
+    background: #f8f1eb;
     border-top: 1px solid var(--line);
     overflow: hidden;
   }
@@ -25,34 +26,54 @@
     min-width: 0;
     flex-direction: column;
     justify-content: center;
-    padding: 68px clamp(24px, 6vw, 88px);
+    padding: 76px clamp(24px, 6vw, 92px);
   }
   .premium-hero h1 {
-    max-width: 480px;
+    max-width: 520px;
     margin: 0 0 20px;
     color: var(--brown);
-    font-size: clamp(44px, 5vw, 68px);
+    font-size: clamp(46px, 5.5vw, 76px);
     font-weight: 500;
     line-height: .97;
   }
   .premium-hero p:not(.bx-eyebrow) {
-    max-width: 480px;
+    max-width: 500px;
     margin: 0 0 28px;
     color: #5d4c40;
     font-size: 17px;
     line-height: 1.55;
   }
   .premium-hero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
-  .premium-hero__media { min-height: 520px; }
+  .premium-hero__media { min-height: 560px; }
   .premium-hero__media img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
+  .premium-promise {
+    padding: 64px 24px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+  }
+  .premium-promise__inner { max-width: 860px; margin: 0 auto; }
+  .premium-promise h2 {
+    margin: 0 0 16px;
+    color: var(--brown);
+    font-size: clamp(30px, 4vw, 54px);
+    font-weight: 500;
+    line-height: 1.06;
+  }
+  .premium-promise p {
+    max-width: 660px;
+    margin: 0 auto;
+    color: #5d4c40;
+    font-size: 17px;
+    line-height: 1.6;
+  }
   .premium-strip {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    border-top: 1px solid var(--line);
     border-bottom: 1px solid var(--line);
   }
   .premium-strip a {
@@ -99,7 +120,19 @@
     min-height: 520px;
     object-fit: cover;
   }
-  .premium-section { padding: 64px 24px; }
+  .premium-editorial--red { background: var(--red); }
+  .premium-editorial--red .premium-editorial__copy h2,
+  .premium-editorial--red .premium-editorial__copy p,
+  .premium-editorial--red .bx-eyebrow { color: #fff; }
+  .premium-editorial--red .premium-editorial__copy p { opacity: .9; }
+  .premium-editorial--red .bx-btn {
+    --btn-bg: #fff;
+    --btn-color: var(--brown);
+    --btn-border: #fff;
+    --btn-hover-bg: #f6f1ec;
+    --btn-hover-color: var(--brown);
+  }
+  .premium-section { padding: 64px 24px; background: #fffaf6; }
   .premium-section__inner { max-width: 1180px; margin: 0 auto; }
   .premium-section__head {
     display: flex;
@@ -109,7 +142,7 @@
     margin-bottom: 28px;
   }
   .premium-section__head p {
-    max-width: 520px;
+    max-width: 560px;
     margin: 0;
     color: #66554a;
     line-height: 1.5;
@@ -139,6 +172,35 @@
   .premium-card div { padding: 18px; }
   .premium-card strong { display: block; color: var(--brown); font-size: 16px; margin-bottom: 8px; }
   .premium-card span { display: block; color: #6a584c; font-size: 14px; line-height: 1.45; }
+  .premium-visit {
+    min-height: 440px;
+    display: grid;
+    place-items: end start;
+    padding: 64px clamp(24px, 6vw, 88px);
+    background:
+      linear-gradient(90deg, rgba(61,43,31,.74), rgba(61,43,31,.18)),
+      url("assets/menu-photos/bc04eca2-f0ad-4390-81be-4c01c618920f-retina-large.jpg") center / cover;
+    color: #fff;
+  }
+  .premium-visit__copy { max-width: 560px; }
+  .premium-visit h2 {
+    margin: 0 0 14px;
+    font-size: clamp(34px, 4vw, 56px);
+    font-weight: 500;
+    line-height: 1.04;
+  }
+  .premium-visit p {
+    margin: 0 0 24px;
+    color: #fff8f1;
+    line-height: 1.55;
+  }
+  .premium-visit .bx-btn {
+    --btn-bg: #fff;
+    --btn-color: var(--brown);
+    --btn-border: #fff;
+    --btn-hover-bg: var(--red);
+    --btn-hover-color: #fff;
+  }
   .premium-account {
     background: var(--brown);
     color: #fff;
@@ -155,15 +217,25 @@
   .premium-account h2 { margin: 0 0 12px; font-size: 32px; font-weight: 500; }
   .premium-account p { margin: 0; color: #f6f1ec; line-height: 1.55; }
   .premium-account__actions { display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap; }
-  .premium-account .bx-btn { background: #fff; color: var(--brown); }
-  .premium-account .bx-btn:hover { background: var(--cream); color: var(--brown); }
-  .premium-account .bx-btn--ghost { background: transparent; color: #fff; border-color: #fff; }
-  .premium-account .bx-btn--ghost:hover { background: rgba(255,255,255,.12); color: #fff; }
+  .premium-account .bx-btn {
+    --btn-bg: #fff;
+    --btn-color: var(--brown);
+    --btn-border: #fff;
+    --btn-hover-bg: var(--cream);
+    --btn-hover-color: var(--brown);
+  }
+  .premium-account .bx-btn--ghost {
+    --btn-bg: transparent;
+    --btn-color: #fff;
+    --btn-border: #fff;
+    --btn-hover-bg: rgba(255,255,255,.16);
+    --btn-hover-color: #fff;
+  }
   @media (max-width: 1024px) {
     .premium-hero,
     .premium-editorial,
     .premium-account__inner { grid-template-columns: 1fr; }
-    .premium-hero__media { order: -1; min-height: 320px; }
+    .premium-hero__media { order: -1; min-height: 340px; }
     .premium-strip { grid-template-columns: repeat(2, 1fr); }
     .premium-cardgrid { grid-template-columns: repeat(2, 1fr); }
     .premium-account__actions { justify-content: flex-start; }
@@ -184,6 +256,7 @@
     .premium-cardgrid { grid-template-columns: 1fr; }
     .premium-section__head { display: block; }
     .premium-section__head .bx-btn { margin-top: 18px; width: 100%; }
+    .premium-visit { min-height: 390px; padding: 44px 20px; }
   }
 </style>
 </head>
@@ -193,12 +266,12 @@
 <main>
   <section class="premium-hero">
     <div class="premium-hero__copy">
-      <p class="bx-eyebrow">illy Caffè National Harbor</p>
-      <h1>The illy experience, made local.</h1>
-      <p>Discover espresso, iced drinks, breakfast, lunch, sweets, rewards, and pickup ordering from the National Harbor café.</p>
+      <p class="bx-eyebrow">illy Caffe National Harbor</p>
+      <h1>Italian coffee culture on the waterfront.</h1>
+      <p>A refined cafe landing page for espresso, iced drinks, breakfast, lunch, sweets, rewards, and pickup ordering at National Harbor.</p>
       <div class="premium-hero__actions">
-        <a class="bx-btn bx-btn--lg" href="pages/section.html?cat=drinks">Explore drinks</a>
-        <a class="bx-btn bx-btn--ghost bx-btn--lg" href="pages/menu.html">View café menu</a>
+        <a class="bx-btn bx-btn--lg" href="pages/section.html?cat=drinks">Explore coffee</a>
+        <a class="bx-btn bx-btn--ghost bx-btn--lg" href="pages/menu.html">Order from the menu</a>
       </div>
     </div>
     <div class="premium-hero__media">
@@ -206,7 +279,15 @@
     </div>
   </section>
 
-  <section class="premium-strip" aria-label="Café sections">
+  <section class="premium-promise">
+    <div class="premium-promise__inner">
+      <p class="bx-eyebrow">Coffee first</p>
+      <h2>The taste of illy, served as a local cafe experience.</h2>
+      <p>This homepage introduces the brand and the National Harbor cafe. It avoids retail coffee-bean sales and sends guests into drinks, food, rewards, gift cards, and pickup ordering.</p>
+    </div>
+  </section>
+
+  <section class="premium-strip" aria-label="Cafe sections">
     <a href="pages/section.html?cat=drinks">
       <strong>Espresso & drinks</strong>
       <span>Hot espresso, iced drinks, tea lattes, brewed coffee, and gelato.</span>
@@ -217,7 +298,7 @@
     </a>
     <a href="pages/menu.html#cat-sandwiches-lunch">
       <strong>Lunch</strong>
-      <span>Fresh salads, focaccia sandwiches, pasta, and café favorites.</span>
+      <span>Fresh salads, focaccia sandwiches, pasta, and cafe favorites.</span>
     </a>
     <a href="pages/section.html?cat=rewards">
       <strong>Rewards</strong>
@@ -225,15 +306,15 @@
     </a>
   </section>
 
-  <section class="premium-editorial">
-    <div class="premium-editorial__media">
-      <img src="assets/menu-photos/20afbf30-27e1-4bc9-ab0c-a7103f166dc1-retina-large.jpg" alt="Sweet café breakfast served with illy style" loading="lazy">
-    </div>
+  <section class="premium-editorial premium-editorial--red">
     <div class="premium-editorial__copy">
-      <p class="bx-eyebrow">Coffee forward</p>
-      <h2>Start with espresso. Stay for the café.</h2>
-      <p>The homepage should feel like illy: refined, warm, visual, and coffee-led. From here, guests can move naturally into drinks, food, pickup ordering, rewards, gift cards, or account creation.</p>
+      <p class="bx-eyebrow">Espresso bar</p>
+      <h2>Start with espresso. Stay for the cafe.</h2>
+      <p>Lead with what illy is known for: balanced espresso, hot and iced drinks, cappuccino, brewed coffee, tea lattes, and gelato. The purchasing flow starts on the menu, not the homepage.</p>
       <a class="bx-btn" href="pages/menu.html#cat-espresso-bar">See espresso drinks</a>
+    </div>
+    <div class="premium-editorial__media">
+      <img src="assets/www.illy.com/livestory/video/illy/posts/orig/69e0fa124a2aedd4d1d953bb.1c7c065f13.jpg" alt="illy espresso machine pouring espresso" loading="lazy">
     </div>
   </section>
 
@@ -241,16 +322,16 @@
     <div class="premium-section__inner">
       <div class="premium-section__head">
         <div>
-          <p class="bx-eyebrow">Café menu highlights</p>
-          <h2>What guests can explore</h2>
-          <p>No retail product pricing on the homepage. These tiles are visual pathways into the café menu and brand experience.</p>
+          <p class="bx-eyebrow">Cafe menu highlights</p>
+          <h2>Browse the cafe, not a retail shelf</h2>
+          <p>These tiles work like illy-style editorial entry points. They help guests choose what they want without showing bean prices or retail product cards.</p>
         </div>
         <a class="bx-btn bx-btn--ghost" href="pages/menu.html">Open full menu</a>
       </div>
       <div class="premium-cardgrid">
         <a class="premium-card" href="pages/menu.html#cat-espresso-bar">
-          <img src="assets/www.illy.com/livestory/video/illy/posts/orig/69e0fa124a2aedd4d1d953bb.1c7c065f13.jpg" alt="illy espresso machine pouring espresso" loading="lazy">
-          <div><strong>Signature espresso</strong><span>Classic espresso drinks, iced favorites, and handcrafted café beverages.</span></div>
+          <img src="assets/www.illy.com/livestory/video/illy/posts/orig/69e0fa124a2aedd4d1d953bb.6f7d82876e.jpg" alt="illy espresso preparation with red espresso machine" loading="lazy">
+          <div><strong>Signature espresso</strong><span>Classic espresso drinks, iced favorites, and handcrafted cafe beverages.</span></div>
         </a>
         <a class="premium-card" href="pages/menu.html#cat-breakfast-sandwiches">
           <img src="assets/menu-photos/29abb938-c650-42bc-95de-28c1f5d78143-retina-large.jpg" alt="Breakfast sandwich" loading="lazy">
@@ -261,10 +342,31 @@
           <div><strong>Lunch</strong><span>Fresh lunch items built for pickup, dine-in, and waterfront visits.</span></div>
         </a>
         <a class="premium-card" href="pages/section.html?cat=giftcards">
-          <img src="assets/menu-photos/b7642385-1236-4cc0-ade1-d488d82de678-retina-large.jpg" alt="Café dessert" loading="lazy">
-          <div><strong>Gifts & sweets</strong><span>Gift cards, bakery items, sweets, and premium café moments.</span></div>
+          <img src="assets/menu-photos/b7642385-1236-4cc0-ade1-d488d82de678-retina-large.jpg" alt="Cafe dessert" loading="lazy">
+          <div><strong>Gifts & sweets</strong><span>Gift cards, bakery items, sweets, and premium cafe moments.</span></div>
         </a>
       </div>
+    </div>
+  </section>
+
+  <section class="premium-editorial">
+    <div class="premium-editorial__media">
+      <img src="assets/menu-photos/20afbf30-27e1-4bc9-ab0c-a7103f166dc1-retina-large.jpg" alt="Sweet cafe breakfast served with illy style" loading="lazy">
+    </div>
+    <div class="premium-editorial__copy">
+      <p class="bx-eyebrow">Morning to afternoon</p>
+      <h2>Breakfast, lunch, sweets, and coffee pairings.</h2>
+      <p>Keep the premium landing-page rhythm, then let the menu page handle prices, item details, cart behavior, and Toast ordering.</p>
+      <a class="bx-btn" href="pages/menu.html#cat-breakfast-sandwiches">Explore food</a>
+    </div>
+  </section>
+
+  <section class="premium-visit">
+    <div class="premium-visit__copy">
+      <p class="bx-eyebrow">Visit National Harbor</p>
+      <h2>Your local illy cafe.</h2>
+      <p>Use the homepage to set the mood, then guide guests to hours, location, pickup ordering, and account features.</p>
+      <a class="bx-btn" href="pages/store.html">Hours & location</a>
     </div>
   </section>
 
@@ -298,7 +400,7 @@ window.ILLY_BRANCH.store = {
 </script>
 <script src="pages/branch.js"></script>
 <script>
-window.ILLY_BRANCH.renderChrome("Menu");
+window.ILLY_BRANCH.renderChrome("");
 </script>
 </body>
 </html>

@@ -22,12 +22,18 @@
 <script src="catalog.js"></script>
 <script src="branch.js"></script>
 <script src="menu.js"></script>
+<script src="menu-remote.js"></script>
 <script src="menu-cart.js"></script>
 <script>
 (function () {
-  var B = window.ILLY_BRANCH, store = window.ILLY_BRANCH.store || {};
+  var B = window.ILLY_BRANCH, M = window.ILLY_MENU, store = window.ILLY_BRANCH.store || {};
   B.renderChrome("Coffee");
   var root = document.getElementById("pickup-root");
+
+  // Wait for live Toast prices/items before summarizing (falls back to built-in).
+  Promise.resolve(M.ready).then(start);
+
+  function start() {
   var items = B.cart.items();
 
   if (!items.length) {
@@ -39,16 +45,25 @@
     return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e7ded6;font-size:14px"><span>' + it.qty + ' × ' + it.product.name.split(" — ")[0] + '</span><strong>' + B.money(it.product.price * it.qty) + '</strong></div>';
   }).join('');
 
+  var fieldStyle = 'width:100%;padding:11px 12px;border:1px solid #e7ded6;border-radius:8px;font:inherit;margin:0 0 10px;box-sizing:border-box';
+
   root.innerHTML =
-    '<div class="bx-pagehead"><h1>Complete payment in Toast</h1>' +
-    '<p>Your selections are summarized below. Finish checkout through Toast so payment is processed securely and the order is sent to the café POS.</p></div>' +
+    '<div class="bx-pagehead"><h1>Checkout</h1>' +
+    '<p>Order ahead for pickup at National Harbor. Pay at the café when you collect, or pay online now through Toast.</p></div>' +
     '<div class="bx-pdp" style="align-items:start">' +
       '<div class="bx-store__card">' +
-        '<h2>Toast checkout</h2>' +
-        '<p style="font-size:14px;line-height:1.55;color:#6a584c;margin:0 0 18px">Toast handles online payment, pickup timing, and POS/kitchen submission for this location. Use the secure checkout below to place the live paid order.</p>' +
-        '<a class="bx-btn bx-btn--lg bx-btn--full" id="toast-checkout" href="#">Pay online with Toast</a>' +
+        '<h2>Order for pickup</h2>' +
+        '<p style="font-size:14px;line-height:1.55;color:#6a584c;margin:0 0 16px">Send your order straight to the café and pay at the counter when you pick up. Fastest option — no re-entering your cart.</p>' +
+        '<input id="cust-first" style="' + fieldStyle + '" placeholder="First name" autocomplete="given-name">' +
+        '<input id="cust-last" style="' + fieldStyle + '" placeholder="Last name" autocomplete="family-name">' +
+        '<input id="cust-phone" style="' + fieldStyle + '" placeholder="Mobile phone" inputmode="tel" autocomplete="tel">' +
+        '<input id="cust-email" style="' + fieldStyle + '" placeholder="Email (optional)" inputmode="email" autocomplete="email">' +
+        '<textarea id="cust-note" style="' + fieldStyle + ';min-height:64px;resize:vertical" placeholder="Notes for the café (optional)"></textarea>' +
+        '<button class="bx-btn bx-btn--lg bx-btn--full" id="place-order">Place pickup order · ' + B.money(B.cart.total()) + '</button>' +
+        '<p id="order-msg" style="font-size:13px;margin:12px 0 0;min-height:18px" aria-live="polite"></p>' +
+        '<div style="display:flex;align-items:center;gap:10px;margin:18px 0;color:#b6a99c;font-size:13px"><span style="flex:1;height:1px;background:#e7ded6"></span>or<span style="flex:1;height:1px;background:#e7ded6"></span></div>' +
+        '<a class="bx-btn bx-btn--ghost bx-btn--full" id="toast-checkout" href="#">Pay online with Toast</a>' +
         '<a class="bx-btn bx-btn--ghost bx-btn--full" style="margin-top:10px" href="menu.html">Keep browsing</a>' +
-        '<p style="font-size:13px;color:#8a7a6e;margin:14px 0 0">Current limitation: this static preview cannot push the exact local cart into Toast automatically. Native cart sync requires Toast Orders API access and a backend integration.</p>' +
       '</div>' +
       '<aside class="bx-store__card">' +
         '<h2>Order summary</h2>' + summary +
@@ -58,6 +73,62 @@
     '</div>';
 
   document.getElementById("toast-checkout").href = B.toastOrderUrl();
+
+  /* ---- Pay-at-pickup: create the order in Toast via /api/order ---- */
+  var btn = document.getElementById("place-order");
+  var msg = document.getElementById("order-msg");
+
+  function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; }
+
+  btn.addEventListener("click", function () {
+    var first = val("cust-first"), phone = val("cust-phone");
+    if (!first || !phone) {
+      msg.style.color = "#b3261e";
+      msg.textContent = "Please add your first name and a phone number so the café can reach you.";
+      return;
+    }
+    btn.disabled = true;
+    msg.style.color = "#6a584c";
+    msg.textContent = "Sending your order to the café…";
+
+    var payload = {
+      items: B.cart.items().map(function (it) { return { id: it.product.id, quantity: it.qty }; }),
+      customer: { firstName: first, lastName: val("cust-last"), phone: phone, email: val("cust-email") },
+      note: val("cust-note")
+    };
+
+    fetch("/api/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) {
+        return res.text().then(function (t) {
+          var j = null;
+          try { j = t ? JSON.parse(t) : null; } catch (e) { j = null; }
+          return { ok: res.ok, body: j };
+        });
+      })
+      .then(function (r) {
+        if (!r.ok || !r.body || !r.body.ok) {
+          throw new Error((r.body && r.body.message) || "Order could not be placed right now.");
+        }
+        B.cart.clear();
+        var num = r.body.displayNumber ? (" #" + r.body.displayNumber) : "";
+        root.innerHTML =
+          '<div class="bx-pagehead"><h1>Order placed' + num + ' 🎉</h1>' +
+          '<p>Your order is in the café. Pay at the counter when you pick up at ' +
+          (store.addressLines || []).join(", ") + '.</p>' +
+          '<div style="margin-top:18px"><a class="bx-btn bx-btn--lg" href="menu.html">Order more</a></div></div>';
+        window.scrollTo(0, 0);
+      })
+      .catch(function (err) {
+        btn.disabled = false;
+        msg.style.color = "#b3261e";
+        msg.textContent = err.message + " You can also pay online with Toast below.";
+      });
+  });
+  }
 })();
 </script>
 </body>

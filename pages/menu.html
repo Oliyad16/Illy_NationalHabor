@@ -37,6 +37,7 @@
 <script src="catalog.js"></script>
 <script src="branch.js"></script>
 <script src="menu.js"></script>
+<script src="menu-remote.js"></script>
 <script src="menu-cart.js"></script>
 <script src="menu-ui.js"></script>
 <script>
@@ -46,6 +47,10 @@
   B.renderChrome("Menu");
   document.getElementById("toast-order-link").href = B.toastOrderUrl();
 
+  // Render once the live Toast menu resolves (falls back to built-in menu).
+  Promise.resolve(M.ready).then(renderMenu);
+
+  function renderMenu() {
   var cats = M.categories;
   var rail = document.getElementById("mn-rail");
   var catsRoot = document.getElementById("mn-cats");
@@ -80,6 +85,7 @@
   /* ---- Ordering: shared modal + click handling ---- */
   UI.mountModal();
   UI.bindGrid(catsRoot);
+  }
 })();
 </script>
 </body>

@@ -26,10 +26,11 @@
 <script src="catalog.js"></script>
 <script src="branch.js"></script>
 <script src="menu.js"></script>
+<script src="menu-remote.js"></script>
 <script src="menu-cart.js"></script>
 <script>
 (function () {
-  var B = window.ILLY_BRANCH;
+  var B = window.ILLY_BRANCH, M = window.ILLY_MENU;
   B.renderChrome("Coffee");
   var root = document.getElementById("cart-root");
 
@@ -58,9 +59,9 @@
         '<div class="bx-cart-total">Total: ' + B.money(B.cart.total()) + '</div>' +
         '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
           '<a class="bx-btn bx-btn--ghost" href="menu.html">Keep browsing</a>' +
-          '<button class="bx-btn bx-btn--lg" id="reserve">Continue to Toast checkout</button>' +
+          '<button class="bx-btn bx-btn--lg" id="reserve">Continue to checkout</button>' +
         '</div>' +
-        '<p style="font-size:13px;color:#8a7a6e;max-width:460px;text-align:right;margin:4px 0 0">You may need to confirm or reselect items in Toast before paying. A native cart sync requires Toast API ordering credentials.</p>' +
+        '<p style="font-size:13px;color:#8a7a6e;max-width:460px;text-align:right;margin:4px 0 0">Next: order ahead for pickup (pay at the café) or pay online with Toast.</p>' +
       '</div>';
   }
 
@@ -79,7 +80,9 @@
     }
   });
 
+  // Re-render once live Toast prices/items resolve (falls back to built-in).
   render();
+  Promise.resolve(M.ready).then(render);
 })();
 </script>
 </body>
