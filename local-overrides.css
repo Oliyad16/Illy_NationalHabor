@@ -509,3 +509,31 @@ header .cc-menu__footer {
 .cc-menu__item.branch-nav-hidden {
   display: none !important;
 }
+
+/* Shared button motion for the mirrored homepage. Keep it aligned with the
+   branch pages so hover states don't feel like different sites. */
+.cc-btn,
+.cc-btn__primary,
+.fpls .ls-button,
+.fpls .ls-illy-button,
+.static-search-panel button {
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease !important;
+}
+
+.cc-btn:hover,
+.cc-btn__primary:hover,
+.fpls a:hover .ls-button,
+.fpls a:hover .ls-illy-button,
+.static-search-panel button:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 22px rgba(61, 43, 31, 0.14) !important;
+}
+
+.cc-btn:active,
+.cc-btn__primary:active,
+.fpls a:active .ls-button,
+.fpls a:active .ls-illy-button,
+.static-search-panel button:active {
+  transform: translateY(0) !important;
+  box-shadow: none !important;
+}

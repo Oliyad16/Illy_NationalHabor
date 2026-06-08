@@ -231,9 +231,10 @@ img { max-width: 100%; display: block; }
   display: inline-flex; align-items: center; justify-content: center;
   background: var(--brown); color: #fff; font-family: inherit;
   font-size: 14px; font-weight: 700; padding: 12px 20px; border-radius: 6px;
-  transition: background .15s ease;
+  transition: background .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease;
 }
-.bx-btn:hover { background: var(--red); }
+.bx-btn:hover { background: var(--red); transform: translateY(-1px); box-shadow: 0 10px 22px rgba(61,43,31,.14); }
+.bx-btn:active { transform: translateY(0); box-shadow: none; }
 .bx-btn--ghost { background: transparent; color: var(--brown); border: 1px solid var(--brown); }
 .bx-btn--ghost:hover { background: var(--cream); color: var(--brown); }
 .bx-btn--full { width: 100%; }

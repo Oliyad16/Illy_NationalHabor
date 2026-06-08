@@ -411,17 +411,46 @@
       control.dataset.staticCartHandled = "true";
       control.addEventListener("click", function (event) {
         event.preventDefault();
-        var sku = skuFromControl(control);
-        if (!sku) {
-          showToast("Browse our shop to add items for pickup.");
-          window.setTimeout(function () { window.location.href = "pages/shop.html"; }, 900);
-          return;
-        }
-        var c = readCart();
-        c[sku] = (c[sku] || 0) + 1;
-        localStorage.setItem(CART_KEY, JSON.stringify(c));
-        updateCartCount();
-        showToast("Added to your pickup cart. View it any time from the cart icon.");
+        window.location.href = "pages/menu.html";
+      });
+    });
+  }
+
+  function setupMenuCtas() {
+    document.querySelectorAll("a, button").forEach(function (control) {
+      if (control.dataset.branchMenuCtaHandled) {
+        return;
+      }
+
+      var text = (control.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      var href = control.tagName === "A" ? (control.getAttribute("href") || "") : "";
+      var isRetailCta =
+        text === "shop now" ||
+        text === "add to cart" ||
+        text === "buy now" ||
+        text === "shop coffee" ||
+        text === "view all" ||
+        /\/en-us\/(coffee|coffee-machines|coffee-gifts|coffee-offers)/.test(href);
+
+      if (!isRetailCta) {
+        return;
+      }
+
+      control.dataset.branchMenuCtaHandled = "true";
+      if (control.tagName === "A") {
+        control.setAttribute("href", "pages/menu.html");
+      }
+
+      var label = control.querySelector(".cc-cta, .ls-button, .ls-illy-button");
+      if (label) {
+        label.textContent = "Order from menu";
+      } else if (text === "shop now" || text === "add to cart" || text === "buy now" || text === "shop coffee") {
+        control.textContent = "Order from menu";
+      }
+
+      control.addEventListener("click", function (event) {
+        event.preventDefault();
+        window.location.href = "pages/menu.html";
       });
     });
   }
@@ -593,6 +622,7 @@
     setupStaticSearch();
     setupCartStub();
     setupLinkStrategy();
+    setupMenuCtas();
     addProductBadges();
     removeInjectedOverlays();
     window.setTimeout(removeInjectedOverlays, 500);
@@ -613,6 +643,9 @@
     window.setTimeout(setupLinkStrategy, 1500);
     window.setTimeout(setupLinkStrategy, 3000);
     window.setTimeout(setupCartStub, 1500);
+    window.setTimeout(setupMenuCtas, 500);
+    window.setTimeout(setupMenuCtas, 1500);
+    window.setTimeout(setupMenuCtas, 3000);
     window.setTimeout(addProductBadges, 500);
     observeForLateLinks();
   }
@@ -626,6 +659,7 @@
     window.__illyLinkObserver = new MutationObserver(function () {
       setupLinkStrategy();
       cleanNavigation();
+      setupMenuCtas();
     });
     window.__illyLinkObserver.observe(document.documentElement, {
       childList: true,
