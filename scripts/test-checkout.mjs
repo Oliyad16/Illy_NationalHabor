@@ -1,11 +1,10 @@
-/* Tests for the Stripe + hours + paid-order-to-Toast logic.
+/* Tests for hours availability + pay-at-pickup order-to-Toast logic.
  * Run: node scripts/test-checkout.mjs
  */
 import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 
 const hours = require("../lib/hours.js");
-const stripe = require("../lib/stripe.js");
 const toast = require("../lib/toast.js");
 
 let passed = 0, failed = 0;
@@ -16,11 +15,6 @@ function assert(cond, name) {
 
 /* ---- hours: open / before-open / near-close ---- */
 (function testHours() {
-  // Build an epoch that is a known time in America/New_York by probing.
-  // 10:00 AM ET on a Wednesday should be OPEN.
-  // We can't use Date.now mocking easily; instead test the pure logic via a
-  // crafted epoch and verify partsInZone maps it, then availabilityAt is consistent.
-
   // Pick a fixed UTC instant: 2026-06-10T14:30:00Z = 10:30 ET (EDT, summer) Wed.
   const openInstant = Date.parse("2026-06-10T14:30:00Z");
   const a = hours.availabilityAt(openInstant);
@@ -35,61 +29,19 @@ function assert(cond, name) {
   assert(late.open === false, "18:00 ET is closed (past last order)");
 })();
 
-/* ---- stripe form encoding (nested + metadata) ---- */
-(function testStripeEncode() {
-  const enc = stripe.formEncode({
-    amount: 1500,
-    currency: "usd",
-    automatic_payment_methods: { enabled: true },
-    metadata: { cart: "2xlatte", note: "no foam" }
-  });
-  assert(enc.indexOf("amount=1500") !== -1, "encodes amount");
-  assert(enc.indexOf("automatic_payment_methods%5Benabled%5D=true") !== -1, "encodes nested bracket key");
-  assert(enc.indexOf("metadata%5Bcart%5D=2xlatte") !== -1, "encodes metadata bracket key");
-  assert(enc.indexOf("metadata%5Bnote%5D=no%20foam") !== -1, "url-encodes metadata value");
-})();
-
-/* ---- stripe webhook signature verify ---- */
-(function testWebhookVerify() {
-  const crypto = require("node:crypto");
-  const env = { STRIPE_WEBHOOK_SECRET: "whsec_test" };
-  const payload = JSON.stringify({ type: "payment_intent.succeeded", data: { object: { id: "pi_1" } } });
-  const t = Math.floor(Date.now() / 1000);
-  const sig = crypto.createHmac("sha256", "whsec_test").update(t + "." + payload, "utf8").digest("hex");
-
-  const ok = stripe.verifyWebhook(payload, "t=" + t + ",v1=" + sig, env);
-  assert(ok && ok.type === "payment_intent.succeeded", "valid signature verifies + parses");
-
-  let threw = false;
-  try { stripe.verifyWebhook(payload, "t=" + t + ",v1=deadbeef", env); }
-  catch (e) { threw = true; }
-  assert(threw, "bad signature rejected");
-
-  threw = false;
-  try { stripe.verifyWebhook(payload, "", env); }
-  catch (e) { threw = true; }
-  assert(threw, "missing signature header rejected");
-})();
-
-/* ---- paid order payload marks PAID via OTHER payment ---- */
-(function testPaidOrderPayload() {
+/* ---- pay-at-pickup order payload (UNPAID, no payment attached) ---- */
+(function testUnpaidOrderPayload() {
   const env = { TOAST_DINING_OPTION_GUID: "dine-takeout" };
   const payload = toast.buildOrderPayload({
     items: [{ guid: "item-latte", quantity: 1 }],
-    customer: { firstName: "Sam" },
-    payment: { amountCents: 1500, reference: "pi_123" }
+    customer: { firstName: "Sam" }
   }, env);
 
-  const payments = payload.checks[0].payments;
-  assert(Array.isArray(payments) && payments.length === 1, "paid order has a payment");
-  assert(payments[0].paymentType === "OTHER", "payment type is OTHER (external/Stripe)");
-  assert(payments[0].amount === 15, "payment amount is dollars (15.00)");
-
-  // Unpaid order (no payment) should have NO payments array.
-  const unpaid = toast.buildOrderPayload({
-    items: [{ guid: "item-latte", quantity: 1 }]
-  }, env);
-  assert(!unpaid.checks[0].payments, "unpaid order has no payment");
+  assert(payload.diningOption.guid === "dine-takeout", "uses the takeout dining option");
+  assert(payload.checks[0].selections[0].item.guid === "item-latte", "selection carries the item guid");
+  assert(payload.checks[0].customer.firstName === "Sam", "customer name is attached");
+  // The site never collects payment — every order is unpaid (pay at counter).
+  assert(!payload.checks[0].payments, "order has no payment (pay at café)");
 })();
 
 console.log("\n" + passed + " passed, " + failed + " failed");

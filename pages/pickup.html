@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="branch.css">
-<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 <div data-chrome-header></div>
@@ -33,22 +32,15 @@
 
   var fieldStyle = 'width:100%;padding:11px 12px;border:1px solid #e7ded6;border-radius:8px;font:inherit;margin:0 0 10px;box-sizing:border-box';
 
-  // Stripe publishable key comes from /api/config (safe to expose; the SECRET key
-  // stays server-side). If absent, the card option is hidden and customers use
-  // pay-at-café / Pay-online-with-Toast.
-  var STRIPE_PK = "";
-
-  // Load config + availability + live menu in parallel before rendering.
+  // Load availability + live menu in parallel before rendering. Payment is
+  // pay-at-café only: the order goes to Toast UNPAID and the customer pays at
+  // the counter on pickup, so the site never handles card data.
   Promise.all([
     Promise.resolve(M.ready),
     fetch("/api/availability", { headers: { Accept: "application/json" } })
       .then(function (r) { return r.json(); })
-      .catch(function () { return { open: true, reason: "", source: "unknown" }; }),
-    fetch("/api/config", { headers: { Accept: "application/json" } })
-      .then(function (r) { return r.json(); })
-      .catch(function () { return {}; })
+      .catch(function () { return { open: true, reason: "", source: "unknown" }; })
   ]).then(function (results) {
-    STRIPE_PK = (results[2] && results[2].stripePublishableKey) || "";
     start(results[1]);
   });
 
@@ -70,17 +62,6 @@
       '<div style="background:#fbeae8;border:1px solid #f0c5c0;color:#8a2b22;border-radius:10px;padding:14px 16px;margin:0 0 18px;font-size:14px">⏰ ' +
       (avail.reason || "Online ordering is currently closed.") + '</div>';
 
-    var cardSection = '';
-    if (STRIPE_PK) {
-      cardSection =
-        '<h2>Pay now by card</h2>' +
-        '<p style="font-size:14px;line-height:1.55;color:#6a584c;margin:0 0 16px">Pay securely online and we\'ll have your order ready for pickup.</p>' +
-        '<div id="card-element" style="' + fieldStyle + ';padding:13px 12px"></div>' +
-        '<button class="bx-btn bx-btn--lg bx-btn--full" id="pay-card"' + (open ? '' : ' disabled') + '>Pay ' + B.money(B.cart.total()) + ' &amp; order</button>' +
-        '<p id="card-msg" style="font-size:13px;margin:12px 0 0;min-height:18px" aria-live="polite"></p>' +
-        '<div style="display:flex;align-items:center;gap:10px;margin:18px 0;color:#b6a99c;font-size:13px"><span style="flex:1;height:1px;background:#e7ded6"></span>or<span style="flex:1;height:1px;background:#e7ded6"></span></div>';
-    }
-
     root.innerHTML =
       '<div class="bx-pagehead"><h1>Checkout</h1>' +
       '<p>Order ahead for pickup at National Harbor.</p></div>' +
@@ -93,8 +74,7 @@
           '<input id="cust-email" style="' + fieldStyle + '" placeholder="Email (optional)" inputmode="email" autocomplete="email">' +
           '<textarea id="cust-note" style="' + fieldStyle + ';min-height:60px;resize:vertical" placeholder="Notes for the café (optional)"></textarea>' +
           '<div style="margin-top:8px"></div>' +
-          cardSection +
-          '<button class="bx-btn ' + (STRIPE_PK ? 'bx-btn--ghost' : '') + ' bx-btn--lg bx-btn--full" id="place-order"' + (open ? '' : ' disabled') + '>Order &amp; pay at café</button>' +
+          '<button class="bx-btn bx-btn--lg bx-btn--full" id="place-order"' + (open ? '' : ' disabled') + '>Order &amp; pay at café</button>' +
           '<p id="order-msg" style="font-size:13px;margin:12px 0 0;min-height:18px" aria-live="polite"></p>' +
           '<a class="bx-btn bx-btn--ghost bx-btn--full" style="margin-top:10px" href="menu.html">Keep browsing</a>' +
           '<div style="margin-top:22px;padding-top:18px;border-top:1px solid #e7ded6">' +
@@ -111,10 +91,9 @@
 
     document.getElementById("toast-checkout").href = B.toastOrderUrl();
 
-    if (!open) return; // closed: inputs visible, pay actions disabled — nothing to wire
+    if (!open) return; // closed: inputs visible, order action disabled — nothing to wire
 
     wirePayAtCafe();
-    if (STRIPE_PK) wireCardPayment();
   }
 
   function cartPayload() {
@@ -161,55 +140,6 @@
           if (!r.ok || !r.body || !r.body.ok) throw new Error((r.body && r.body.message) || "Order could not be placed right now.");
           var num = r.body.displayNumber ? (" #" + r.body.displayNumber) : "";
           showConfirmation("Order placed" + num + " 🎉", "Your order is in the café. Pay at the counter when you pick up at " + (store.addressLines || []).join(", ") + ".");
-        })
-        .catch(function (err) {
-          btn.disabled = false;
-          msg.style.color = "#b3261e";
-          msg.textContent = err.message;
-        });
-    });
-  }
-
-  /* ---- Pay now by card (Stripe) ---- */
-  function wireCardPayment() {
-    var stripe = Stripe(STRIPE_PK);
-    var elements = stripe.elements();
-    var card = elements.create("card", { style: { base: { fontSize: "16px", fontFamily: "Manrope, sans-serif" } } });
-    card.mount("#card-element");
-
-    var btn = document.getElementById("pay-card");
-    var msg = document.getElementById("card-msg");
-
-    btn.addEventListener("click", function () {
-      if (!requireContact(msg)) return;
-      btn.disabled = true;
-      msg.style.color = "#6a584c";
-      msg.textContent = "Starting secure payment…";
-
-      // 1. Create the PaymentIntent (server prices the cart + re-checks hours).
-      fetch("/api/create-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(cartPayload())
-      })
-        .then(function (res) { return res.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {} return { ok: res.ok, body: j }; }); })
-        .then(function (r) {
-          if (!r.ok || !r.body || !r.body.clientSecret) {
-            throw new Error((r.body && r.body.message) || "Could not start checkout.");
-          }
-          msg.textContent = "Confirming your card…";
-          // 2. Confirm the card payment with Stripe.
-          return stripe.confirmCardPayment(r.body.clientSecret, {
-            payment_method: {
-              card: card,
-              billing_details: { name: (val("cust-first") + " " + val("cust-last")).trim(), email: val("cust-email"), phone: val("cust-phone") }
-            }
-          });
-        })
-        .then(function (result) {
-          if (result.error) throw new Error(result.error.message || "Payment failed.");
-          // 3. Paid. The webhook pushes the order to Toast server-side.
-          showConfirmation("Payment received 🎉", "Thanks! Your paid order is being sent to the café for pickup at " + (store.addressLines || []).join(", ") + ". You'll get a receipt by email" + (val("cust-email") ? "" : " if you provided one") + ".");
         })
         .catch(function (err) {
           btn.disabled = false;
