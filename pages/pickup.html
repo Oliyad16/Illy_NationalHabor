@@ -96,8 +96,11 @@
           cardSection +
           '<button class="bx-btn ' + (STRIPE_PK ? 'bx-btn--ghost' : '') + ' bx-btn--lg bx-btn--full" id="place-order"' + (open ? '' : ' disabled') + '>Order &amp; pay at café</button>' +
           '<p id="order-msg" style="font-size:13px;margin:12px 0 0;min-height:18px" aria-live="polite"></p>' +
-          '<a class="bx-btn bx-btn--ghost bx-btn--full" id="toast-checkout" style="margin-top:10px" href="#">Pay online with Toast</a>' +
           '<a class="bx-btn bx-btn--ghost bx-btn--full" style="margin-top:10px" href="menu.html">Keep browsing</a>' +
+          '<div style="margin-top:22px;padding-top:18px;border-top:1px solid #e7ded6">' +
+            '<a id="toast-checkout" style="font-size:13px;color:#8a7a6e;text-decoration:underline" href="#" target="_blank" rel="noopener">Prefer to order on Toast’s site instead?</a>' +
+            '<p style="font-size:12px;color:#b6a99c;margin:6px 0 0;line-height:1.5">Opens Toast’s ordering page with a fresh menu — your current cart won’t carry over, so you’ll re-add items there.</p>' +
+          '</div>' +
         '</div>' +
         '<aside class="bx-store__card">' +
           '<h2>Order summary</h2>' + summary +
