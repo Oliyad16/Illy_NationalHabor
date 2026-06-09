@@ -13,20 +13,22 @@ function assert(cond, name) {
   else { failed++; console.log("FAIL  " + name); }
 }
 
-/* ---- hours: open / before-open / near-close ---- */
+/* ---- hours: open / before-open / near-close ----
+ * Fallback config mirrors live Toast: café open 6 AM–8 PM ET, last online order
+ * 20 min before close (= 7:40 PM). Times below are EDT (summer). */
 (function testHours() {
-  // Pick a fixed UTC instant: 2026-06-10T14:30:00Z = 10:30 ET (EDT, summer) Wed.
+  // 2026-06-10T14:30:00Z = 10:30 ET (EDT) Wed — mid-day, open.
   const openInstant = Date.parse("2026-06-10T14:30:00Z");
   const a = hours.availabilityAt(openInstant);
   assert(a.open === true, "10:30 ET Wednesday is open");
 
-  // 2026-06-10T11:00:00Z = 07:00 ET — before 8AM open.
-  const early = hours.availabilityAt(Date.parse("2026-06-10T11:00:00Z"));
-  assert(early.open === false && /opens at/i.test(early.reason), "07:00 ET is closed (before open)");
+  // 2026-06-10T09:00:00Z = 05:00 ET — before 6 AM open.
+  const early = hours.availabilityAt(Date.parse("2026-06-10T09:00:00Z"));
+  assert(early.open === false && /opens at/i.test(early.reason), "05:00 ET is closed (before open)");
 
-  // 2026-06-10T22:00:00Z = 18:00 ET — at close, past last-order cutoff.
-  const late = hours.availabilityAt(Date.parse("2026-06-10T22:00:00Z"));
-  assert(late.open === false, "18:00 ET is closed (past last order)");
+  // 2026-06-10T23:50:00Z = 19:50 ET — past the 7:40 PM last-order cutoff.
+  const late = hours.availabilityAt(Date.parse("2026-06-10T23:50:00Z"));
+  assert(late.open === false, "19:50 ET is closed (past last order)");
 })();
 
 /* ---- pay-at-pickup order payload (UNPAID, no payment attached) ---- */
