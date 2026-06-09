@@ -380,7 +380,12 @@
     dashPanel.hidden = false;
     document.getElementById("dash-hi").textContent = "Hi, " + firstName(user);
     document.getElementById("dash-role").textContent = window.ILLY_CLERK.roleLabel(user.role);
-    document.getElementById("dash-admin-link").hidden = !user.isAdmin;
+    // Admin entry only for verified admin/super_admin. Check both the boolean and
+    // the role string so a stale/partial user object can never reveal it.
+    var isAdmin = user.isAdmin === true && (user.role === "admin" || user.role === "super_admin");
+    var adminLink = document.getElementById("dash-admin-link");
+    adminLink.hidden = !isAdmin;
+    if (!isAdmin) adminLink.style.display = "none";
     document.getElementById("details-email").textContent = user.email || "Manage your account";
 
     clerk.mountUserButton(document.getElementById("clerk-user-button"), {

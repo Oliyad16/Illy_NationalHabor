@@ -3,6 +3,20 @@
   "buildCommand": null,
   "outputDirectory": ".",
   "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/pages/(account|admin).html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/pages/(account|admin)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
+      ]
+    }
+  ],
   "functions": {
     "api/menu.js": { "maxDuration": 10 },
     "api/create-payment.js": { "maxDuration": 10 },
