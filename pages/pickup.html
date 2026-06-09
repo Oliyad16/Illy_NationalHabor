@@ -3,16 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Toast Checkout — illy Caffè National Harbor</title>
+<title>Checkout — illy Caffè National Harbor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="branch.css">
+<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 <div data-chrome-header></div>
 
 <main class="bx-wrap">
-  <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <a href="cart.html">Cart</a> / <span>Pickup</span></nav>
+  <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <a href="cart.html">Cart</a> / <span>Checkout</span></nav>
   <div id="pickup-root"></div>
 </main>
 
@@ -30,104 +31,189 @@
   B.renderChrome("Coffee");
   var root = document.getElementById("pickup-root");
 
-  // Wait for live Toast prices/items before summarizing (falls back to built-in).
-  Promise.resolve(M.ready).then(start);
-
-  function start() {
-  var items = B.cart.items();
-
-  if (!items.length) {
-    root.innerHTML = '<div class="bx-empty"><p>Your pickup cart is empty.</p><a class="bx-btn" href="menu.html">Start your order</a></div>';
-    return;
-  }
-
-  var summary = items.map(function (it) {
-    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e7ded6;font-size:14px"><span>' + it.qty + ' × ' + it.product.name.split(" — ")[0] + '</span><strong>' + B.money(it.product.price * it.qty) + '</strong></div>';
-  }).join('');
-
   var fieldStyle = 'width:100%;padding:11px 12px;border:1px solid #e7ded6;border-radius:8px;font:inherit;margin:0 0 10px;box-sizing:border-box';
 
-  root.innerHTML =
-    '<div class="bx-pagehead"><h1>Checkout</h1>' +
-    '<p>Order ahead for pickup at National Harbor. Pay at the café when you collect, or pay online now through Toast.</p></div>' +
-    '<div class="bx-pdp" style="align-items:start">' +
-      '<div class="bx-store__card">' +
-        '<h2>Order for pickup</h2>' +
-        '<p style="font-size:14px;line-height:1.55;color:#6a584c;margin:0 0 16px">Send your order straight to the café and pay at the counter when you pick up. Fastest option — no re-entering your cart.</p>' +
-        '<input id="cust-first" style="' + fieldStyle + '" placeholder="First name" autocomplete="given-name">' +
-        '<input id="cust-last" style="' + fieldStyle + '" placeholder="Last name" autocomplete="family-name">' +
-        '<input id="cust-phone" style="' + fieldStyle + '" placeholder="Mobile phone" inputmode="tel" autocomplete="tel">' +
-        '<input id="cust-email" style="' + fieldStyle + '" placeholder="Email (optional)" inputmode="email" autocomplete="email">' +
-        '<textarea id="cust-note" style="' + fieldStyle + ';min-height:64px;resize:vertical" placeholder="Notes for the café (optional)"></textarea>' +
-        '<button class="bx-btn bx-btn--lg bx-btn--full" id="place-order">Place pickup order · ' + B.money(B.cart.total()) + '</button>' +
-        '<p id="order-msg" style="font-size:13px;margin:12px 0 0;min-height:18px" aria-live="polite"></p>' +
-        '<div style="display:flex;align-items:center;gap:10px;margin:18px 0;color:#b6a99c;font-size:13px"><span style="flex:1;height:1px;background:#e7ded6"></span>or<span style="flex:1;height:1px;background:#e7ded6"></span></div>' +
-        '<a class="bx-btn bx-btn--ghost bx-btn--full" id="toast-checkout" href="#">Pay online with Toast</a>' +
-        '<a class="bx-btn bx-btn--ghost bx-btn--full" style="margin-top:10px" href="menu.html">Keep browsing</a>' +
-      '</div>' +
-      '<aside class="bx-store__card">' +
-        '<h2>Order summary</h2>' + summary +
-        '<div style="display:flex;justify-content:space-between;margin-top:14px;font-size:18px"><span style="font-weight:700">Total</span><strong>' + B.money(B.cart.total()) + '</strong></div>' +
-        '<div class="bx-pickup" style="margin-top:18px">📍 ' + (store.addressLines || []).join(', ') + '</div>' +
-      '</aside>' +
-    '</div>';
+  // Stripe publishable key comes from /api/config (safe to expose; the SECRET key
+  // stays server-side). If absent, the card option is hidden and customers use
+  // pay-at-café / Pay-online-with-Toast.
+  var STRIPE_PK = "";
 
-  document.getElementById("toast-checkout").href = B.toastOrderUrl();
-
-  /* ---- Pay-at-pickup: create the order in Toast via /api/order ---- */
-  var btn = document.getElementById("place-order");
-  var msg = document.getElementById("order-msg");
+  // Load config + availability + live menu in parallel before rendering.
+  Promise.all([
+    Promise.resolve(M.ready),
+    fetch("/api/availability", { headers: { Accept: "application/json" } })
+      .then(function (r) { return r.json(); })
+      .catch(function () { return { open: true, reason: "", source: "unknown" }; }),
+    fetch("/api/config", { headers: { Accept: "application/json" } })
+      .then(function (r) { return r.json(); })
+      .catch(function () { return {}; })
+  ]).then(function (results) {
+    STRIPE_PK = (results[2] && results[2].stripePublishableKey) || "";
+    start(results[1]);
+  });
 
   function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; }
 
-  btn.addEventListener("click", function () {
-    var first = val("cust-first"), phone = val("cust-phone");
-    if (!first || !phone) {
-      msg.style.color = "#b3261e";
-      msg.textContent = "Please add your first name and a phone number so the café can reach you.";
+  function start(avail) {
+    var items = B.cart.items();
+    if (!items.length) {
+      root.innerHTML = '<div class="bx-empty"><p>Your pickup cart is empty.</p><a class="bx-btn" href="menu.html">Start your order</a></div>';
       return;
     }
-    btn.disabled = true;
-    msg.style.color = "#6a584c";
-    msg.textContent = "Sending your order to the café…";
 
-    var payload = {
+    var summary = items.map(function (it) {
+      return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e7ded6;font-size:14px"><span>' + it.qty + ' × ' + it.product.name.split(" — ")[0] + '</span><strong>' + B.money(it.product.price * it.qty) + '</strong></div>';
+    }).join('');
+
+    var open = !!avail.open;
+    var closedBanner = open ? '' :
+      '<div style="background:#fbeae8;border:1px solid #f0c5c0;color:#8a2b22;border-radius:10px;padding:14px 16px;margin:0 0 18px;font-size:14px">⏰ ' +
+      (avail.reason || "Online ordering is currently closed.") + '</div>';
+
+    var cardSection = '';
+    if (STRIPE_PK) {
+      cardSection =
+        '<h2>Pay now by card</h2>' +
+        '<p style="font-size:14px;line-height:1.55;color:#6a584c;margin:0 0 16px">Pay securely online and we\'ll have your order ready for pickup.</p>' +
+        '<div id="card-element" style="' + fieldStyle + ';padding:13px 12px"></div>' +
+        '<button class="bx-btn bx-btn--lg bx-btn--full" id="pay-card"' + (open ? '' : ' disabled') + '>Pay ' + B.money(B.cart.total()) + ' &amp; order</button>' +
+        '<p id="card-msg" style="font-size:13px;margin:12px 0 0;min-height:18px" aria-live="polite"></p>' +
+        '<div style="display:flex;align-items:center;gap:10px;margin:18px 0;color:#b6a99c;font-size:13px"><span style="flex:1;height:1px;background:#e7ded6"></span>or<span style="flex:1;height:1px;background:#e7ded6"></span></div>';
+    }
+
+    root.innerHTML =
+      '<div class="bx-pagehead"><h1>Checkout</h1>' +
+      '<p>Order ahead for pickup at National Harbor.</p></div>' +
+      closedBanner +
+      '<div class="bx-pdp" style="align-items:start">' +
+        '<div class="bx-store__card">' +
+          '<input id="cust-first" style="' + fieldStyle + '" placeholder="First name" autocomplete="given-name">' +
+          '<input id="cust-last" style="' + fieldStyle + '" placeholder="Last name" autocomplete="family-name">' +
+          '<input id="cust-phone" style="' + fieldStyle + '" placeholder="Mobile phone" inputmode="tel" autocomplete="tel">' +
+          '<input id="cust-email" style="' + fieldStyle + '" placeholder="Email (optional)" inputmode="email" autocomplete="email">' +
+          '<textarea id="cust-note" style="' + fieldStyle + ';min-height:60px;resize:vertical" placeholder="Notes for the café (optional)"></textarea>' +
+          '<div style="margin-top:8px"></div>' +
+          cardSection +
+          '<button class="bx-btn ' + (STRIPE_PK ? 'bx-btn--ghost' : '') + ' bx-btn--lg bx-btn--full" id="place-order"' + (open ? '' : ' disabled') + '>Order &amp; pay at café</button>' +
+          '<p id="order-msg" style="font-size:13px;margin:12px 0 0;min-height:18px" aria-live="polite"></p>' +
+          '<a class="bx-btn bx-btn--ghost bx-btn--full" id="toast-checkout" style="margin-top:10px" href="#">Pay online with Toast</a>' +
+          '<a class="bx-btn bx-btn--ghost bx-btn--full" style="margin-top:10px" href="menu.html">Keep browsing</a>' +
+        '</div>' +
+        '<aside class="bx-store__card">' +
+          '<h2>Order summary</h2>' + summary +
+          '<div style="display:flex;justify-content:space-between;margin-top:14px;font-size:18px"><span style="font-weight:700">Total</span><strong>' + B.money(B.cart.total()) + '</strong></div>' +
+          '<div class="bx-pickup" style="margin-top:18px">📍 ' + (store.addressLines || []).join(', ') + '</div>' +
+        '</aside>' +
+      '</div>';
+
+    document.getElementById("toast-checkout").href = B.toastOrderUrl();
+
+    if (!open) return; // closed: inputs visible, pay actions disabled — nothing to wire
+
+    wirePayAtCafe();
+    if (STRIPE_PK) wireCardPayment();
+  }
+
+  function cartPayload() {
+    return {
       items: B.cart.items().map(function (it) { return { id: it.product.id, quantity: it.qty }; }),
-      customer: { firstName: first, lastName: val("cust-last"), phone: phone, email: val("cust-email") },
+      customer: { firstName: val("cust-first"), lastName: val("cust-last"), phone: val("cust-phone"), email: val("cust-email") },
       note: val("cust-note")
     };
+  }
 
-    fetch("/api/order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(payload)
-    })
-      .then(function (res) {
-        return res.text().then(function (t) {
-          var j = null;
-          try { j = t ? JSON.parse(t) : null; } catch (e) { j = null; }
-          return { ok: res.ok, body: j };
+  function requireContact(msgEl) {
+    if (!val("cust-first") || !val("cust-phone")) {
+      msgEl.style.color = "#b3261e";
+      msgEl.textContent = "Please add your first name and a phone number so the café can reach you.";
+      return false;
+    }
+    return true;
+  }
+
+  function showConfirmation(headline, sub) {
+    B.cart.clear();
+    root.innerHTML =
+      '<div class="bx-pagehead"><h1>' + headline + '</h1><p>' + sub + '</p>' +
+      '<div style="margin-top:18px"><a class="bx-btn bx-btn--lg" href="menu.html">Order more</a></div></div>';
+    window.scrollTo(0, 0);
+  }
+
+  /* ---- Pay at café (unpaid order to Toast) ---- */
+  function wirePayAtCafe() {
+    var btn = document.getElementById("place-order");
+    var msg = document.getElementById("order-msg");
+    btn.addEventListener("click", function () {
+      if (!requireContact(msg)) return;
+      btn.disabled = true;
+      msg.style.color = "#6a584c";
+      msg.textContent = "Sending your order to the café…";
+      fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(cartPayload())
+      })
+        .then(function (res) { return res.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {} return { ok: res.ok, body: j }; }); })
+        .then(function (r) {
+          if (!r.ok || !r.body || !r.body.ok) throw new Error((r.body && r.body.message) || "Order could not be placed right now.");
+          var num = r.body.displayNumber ? (" #" + r.body.displayNumber) : "";
+          showConfirmation("Order placed" + num + " 🎉", "Your order is in the café. Pay at the counter when you pick up at " + (store.addressLines || []).join(", ") + ".");
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          msg.style.color = "#b3261e";
+          msg.textContent = err.message;
         });
+    });
+  }
+
+  /* ---- Pay now by card (Stripe) ---- */
+  function wireCardPayment() {
+    var stripe = Stripe(STRIPE_PK);
+    var elements = stripe.elements();
+    var card = elements.create("card", { style: { base: { fontSize: "16px", fontFamily: "Manrope, sans-serif" } } });
+    card.mount("#card-element");
+
+    var btn = document.getElementById("pay-card");
+    var msg = document.getElementById("card-msg");
+
+    btn.addEventListener("click", function () {
+      if (!requireContact(msg)) return;
+      btn.disabled = true;
+      msg.style.color = "#6a584c";
+      msg.textContent = "Starting secure payment…";
+
+      // 1. Create the PaymentIntent (server prices the cart + re-checks hours).
+      fetch("/api/create-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(cartPayload())
       })
-      .then(function (r) {
-        if (!r.ok || !r.body || !r.body.ok) {
-          throw new Error((r.body && r.body.message) || "Order could not be placed right now.");
-        }
-        B.cart.clear();
-        var num = r.body.displayNumber ? (" #" + r.body.displayNumber) : "";
-        root.innerHTML =
-          '<div class="bx-pagehead"><h1>Order placed' + num + ' 🎉</h1>' +
-          '<p>Your order is in the café. Pay at the counter when you pick up at ' +
-          (store.addressLines || []).join(", ") + '.</p>' +
-          '<div style="margin-top:18px"><a class="bx-btn bx-btn--lg" href="menu.html">Order more</a></div></div>';
-        window.scrollTo(0, 0);
-      })
-      .catch(function (err) {
-        btn.disabled = false;
-        msg.style.color = "#b3261e";
-        msg.textContent = err.message + " You can also pay online with Toast below.";
-      });
-  });
+        .then(function (res) { return res.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {} return { ok: res.ok, body: j }; }); })
+        .then(function (r) {
+          if (!r.ok || !r.body || !r.body.clientSecret) {
+            throw new Error((r.body && r.body.message) || "Could not start checkout.");
+          }
+          msg.textContent = "Confirming your card…";
+          // 2. Confirm the card payment with Stripe.
+          return stripe.confirmCardPayment(r.body.clientSecret, {
+            payment_method: {
+              card: card,
+              billing_details: { name: (val("cust-first") + " " + val("cust-last")).trim(), email: val("cust-email"), phone: val("cust-phone") }
+            }
+          });
+        })
+        .then(function (result) {
+          if (result.error) throw new Error(result.error.message || "Payment failed.");
+          // 3. Paid. The webhook pushes the order to Toast server-side.
+          showConfirmation("Payment received 🎉", "Thanks! Your paid order is being sent to the café for pickup at " + (store.addressLines || []).join(", ") + ". You'll get a receipt by email" + (val("cust-email") ? "" : " if you provided one") + ".");
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          msg.style.color = "#b3261e";
+          msg.textContent = err.message;
+        });
+    });
   }
 })();
 </script>

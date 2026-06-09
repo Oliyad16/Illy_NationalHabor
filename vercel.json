@@ -4,8 +4,9 @@
   "outputDirectory": ".",
   "cleanUrls": true,
   "functions": {
-    "api/menu.js": {
-      "maxDuration": 10
-    }
+    "api/menu.js": { "maxDuration": 10 },
+    "api/create-payment.js": { "maxDuration": 10 },
+    "api/stripe-webhook.js": { "maxDuration": 15 },
+    "api/order.js": { "maxDuration": 10 }
   }
 }
