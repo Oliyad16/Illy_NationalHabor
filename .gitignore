@@ -13,3 +13,7 @@ yarn-error.log*
 # Local Claude Code tooling
 .agents/
 skills-lock.json
+.env*
+
+# Throwaway local probe scripts
+scripts/_probe*.mjs

@@ -14,6 +14,20 @@
 
 const toast = require("../lib/toast");
 const overrides = require("../lib/menu-overrides");
+const menuImages = require("../lib/menu-images");
+
+// Apply admin-set image overrides (item id -> url) onto the menu. Setting item.img
+// makes it win over the baked item.photo in pages/menu.js photoUrl. Best-effort:
+// if the override store is unavailable we serve the baked photos unchanged.
+function applyImageOverrides(categories, imageMap) {
+  if (!imageMap) return;
+  categories.forEach(function (cat) {
+    (cat.items || []).forEach(function (it) {
+      const url = imageMap[it.id];
+      if (url) it.img = url;
+    });
+  });
+}
 
 module.exports = async function handler(req, res) {
   if (req.method && req.method !== "GET") {
@@ -26,6 +40,9 @@ module.exports = async function handler(req, res) {
     const { categories, cached, fetchedAt } = await toast.getMenu(process.env, {
       overrides: overrides.byName
     });
+
+    const imageMap = await menuImages.getImageMap(process.env).catch(function () { return null; });
+    applyImageOverrides(categories, imageMap);
 
     // Cache at the CDN for 5 min, allow stale-while-revalidate for resilience.
     res.setHeader(
