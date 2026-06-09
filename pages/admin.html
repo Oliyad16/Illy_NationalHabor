@@ -127,35 +127,6 @@
   .manage-msg.is-err { color: var(--red); }
   .super-note { margin: 16px 0 0; font-size: 13px; color: var(--muted); }
 
-  /* ---- menu images ---- */
-  .mi-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
-  .mi-toolbar input[type=search] { flex: 1 1 240px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; }
-  .mi-toolbar select { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; font: inherit; background: #fff; }
-  .mi-note { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
-  .mi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-  .mi-card { border: 1px solid var(--line); border-radius: 12px; background: #fff; overflow: hidden; display: flex; flex-direction: column; }
-  .mi-thumb { position: relative; aspect-ratio: 4 / 3; background: var(--cream); display: flex; align-items: center; justify-content: center; }
-  .mi-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .mi-thumb .mi-empty { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-  .mi-badge { position: absolute; top: 8px; left: 8px; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
-  .mi-badge.is-custom { background: var(--red); color: #fff; }
-  .mi-badge.is-default { background: rgba(255,255,255,.9); color: var(--muted); border: 1px solid var(--line); }
-  .mi-body { padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .mi-name { font-size: 14.5px; font-weight: 700; color: var(--brown); line-height: 1.25; }
-  .mi-cat { font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-  .mi-row { display: flex; gap: 8px; }
-  .mi-row input[type=url] { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; font: inherit; font-size: 13px; }
-  .mi-row input[type=file] { display: none; }
-  .mi-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .mi-btn { border: 1px solid var(--line); background: #fff; border-radius: 7px; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 700; color: var(--brown); padding: 7px 12px; }
-  .mi-btn.is-primary { background: var(--brown); color: #fff; border-color: var(--brown); }
-  .mi-btn:hover { filter: brightness(.97); }
-  .mi-btn[disabled] { opacity: .5; cursor: default; }
-  .mi-msg { font-size: 12px; min-height: 14px; }
-  .mi-msg.is-ok { color: var(--ok); }
-  .mi-msg.is-err { color: var(--red); }
-  .mi-upload-soon { font-size: 11px; color: var(--muted); }
-
   .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; }
   .skel { display: inline-block; height: 1em; width: 56px; border-radius: 4px; background: linear-gradient(90deg,#eee,#f6f0ea,#eee); background-size: 200% 100%; animation: sk 1.1s linear infinite; }
   @keyframes sk { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
@@ -175,7 +146,7 @@
 <div data-chrome-header></div>
 
 <main class="bx-wrap">
-  <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>Admin</span></nav>
+  <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>Admin</span> / <a href="menu-admin.html">Menu</a></nav>
   <div class="bx-pagehead">
     <p class="bx-eyebrow">Role protected</p>
     <h1>Admin dashboard</h1>
@@ -297,20 +268,12 @@
       </table>
     </div>
 
-    <!-- Menu images (admins + super admins) -->
+    <!-- Menu images now live on their own page (pages/menu-admin.html), reachable
+         from the "Menu" tab in the top nav. -->
     <h3 class="section-title">Menu images</h3>
-    <p class="mi-note">Set the photo shown for any food or drink on the live menu. Paste an image link and Save — it appears to customers within a minute, no redeploy. <span class="mi-upload-soon">Device upload coming soon.</span></p>
-    <div class="mi-toolbar">
-      <input type="search" id="mi-search" placeholder="Search items…" autocomplete="off">
-      <select id="mi-filter" aria-label="Filter items">
-        <option value="">All items</option>
-        <option value="custom">Custom image set</option>
-        <option value="default">Using default / none</option>
-      </select>
-      <button class="bx-btn bx-btn--ghost" id="mi-refresh" type="button">Refresh</button>
-    </div>
-    <div class="mi-grid" id="mi-grid">
-      <p class="muted">Loading menu items…</p>
+    <p style="margin:0 0 14px;color:#66554a;font-size:14px;line-height:1.5">Set the photo shown for any food or drink on the live menu — names, prices, and items stay managed in Toast.</p>
+    <div class="admin-actions" style="margin-bottom:8px">
+      <a class="bx-btn" href="menu-admin.html">Open Menu editor</a>
     </div>
 
     <!-- Super admin only -->
@@ -616,115 +579,9 @@
     });
   }
 
-  /* ---------- Menu images ---------- */
-  var _miItems = [];
-
-  function miThumb(it) {
-    var isCustom = !!it.overrideUrl;
-    var url = it.currentUrl;
-    var inner = url
-      ? '<img src="' + esc(url) + '" alt="' + esc(it.name) + '" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.insertAdjacentHTML(\'beforeend\',\'<span class=&quot;mi-empty&quot;>image failed</span>\')">'
-      : '<span class="mi-empty">No image</span>';
-    var badge = isCustom
-      ? '<span class="mi-badge is-custom">Custom</span>'
-      : (url ? '<span class="mi-badge is-default">Default</span>' : "");
-    return '<div class="mi-thumb">' + badge + inner + "</div>";
-  }
-
-  function miCard(it) {
-    return '<div class="mi-card" data-id="' + esc(it.id) + '">' +
-      miThumb(it) +
-      '<div class="mi-body">' +
-        '<div><span class="mi-cat">' + esc(it.category) + '</span><div class="mi-name">' + esc(it.name) + "</div></div>" +
-        '<div class="mi-row">' +
-          '<input type="url" class="mi-input" placeholder="https://…/photo.jpg" value="' + esc(it.overrideUrl || "") + '" autocomplete="off">' +
-        "</div>" +
-        '<div class="mi-actions">' +
-          '<button type="button" class="mi-btn is-primary mi-save">Save</button>' +
-          (it.overrideUrl ? '<button type="button" class="mi-btn mi-reset">Reset to default</button>' : "") +
-        "</div>" +
-        '<div class="mi-msg" role="status"></div>' +
-      "</div>" +
-    "</div>";
-  }
-
-  function renderMenuImages() {
-    var grid = $("mi-grid");
-    var q = $("mi-search").value.trim().toLowerCase();
-    var filter = $("mi-filter").value;
-    var rows = _miItems.filter(function (it) {
-      if (q && (it.name + " " + it.category).toLowerCase().indexOf(q) === -1) return false;
-      if (filter === "custom" && !it.overrideUrl) return false;
-      if (filter === "default" && it.overrideUrl) return false;
-      return true;
-    });
-    if (!rows.length) { grid.innerHTML = '<p class="muted">No items match.</p>'; return; }
-    grid.innerHTML = rows.map(miCard).join("");
-  }
-
-  function loadMenuImages() {
-    var grid = $("mi-grid");
-    grid.innerHTML = '<p class="muted">Loading menu items…</p>';
-    window.ILLY_CLERK.api("/api/admin/menu-images")
-      .then(function (json) { _miItems = json.items || []; renderMenuImages(); })
-      .catch(function (err) {
-        grid.innerHTML = '<p class="muted">' + esc(err.message || "Could not load menu items.") + "</p>";
-      });
-  }
-
-  function saveMenuImage(card, url) {
-    var id = card.getAttribute("data-id");
-    var msg = card.querySelector(".mi-msg");
-    var btns = card.querySelectorAll(".mi-btn");
-    msg.className = "mi-msg"; msg.textContent = "";
-    Array.prototype.forEach.call(btns, function (b) { b.disabled = true; });
-    return window.ILLY_CLERK.api("/api/admin/menu-images", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ itemId: id, url: url })
-    })
-      .then(function () {
-        // Update local model + re-render just this card's state.
-        var item = _miItems.filter(function (x) { return x.id === id; })[0];
-        if (item) {
-          item.overrideUrl = url || "";
-          item.currentUrl = url || item.defaultPhoto || "";
-        }
-        msg.className = "mi-msg is-ok";
-        msg.textContent = url ? "Saved — live within a minute." : "Reset to default.";
-        // Refresh the thumbnail/badge by replacing the card.
-        var fresh = document.createElement("div");
-        fresh.innerHTML = miCard(item);
-        card.parentNode.replaceChild(fresh.firstChild, card);
-      })
-      .catch(function (err) {
-        msg.className = "mi-msg is-err";
-        msg.textContent = err.message || "Could not save.";
-        Array.prototype.forEach.call(btns, function (b) { b.disabled = false; });
-      });
-  }
-
-  function wireMenuImages() {
-    var search = $("mi-search");
-    var timer = null;
-    search.addEventListener("input", function () {
-      clearTimeout(timer);
-      timer = setTimeout(renderMenuImages, 250);
-    });
-    $("mi-filter").addEventListener("change", renderMenuImages);
-    $("mi-refresh").addEventListener("click", loadMenuImages);
-
-    $("mi-grid").addEventListener("click", function (e) {
-      var card = e.target.closest(".mi-card");
-      if (!card) return;
-      if (e.target.closest(".mi-save")) {
-        var input = card.querySelector(".mi-input");
-        saveMenuImage(card, input.value.trim());
-      } else if (e.target.closest(".mi-reset")) {
-        saveMenuImage(card, "");
-      }
-    });
-  }
+  /* Menu image editing now lives on its own page: pages/menu-admin.html
+     (linked from the "Open Menu editor" button above and the Home / Admin / Menu
+     tab strip at the top of the admin area). */
 
   /* ---------- Boot ---------- */
   window.ILLY_CLERK.load()
@@ -769,13 +626,11 @@
 
       wireRange();
       wireUserTools();
-      wireMenuImages();
       if (user.isSuperAdmin) wireManageForm();
 
       loadMetrics();
       loadStats();
       loadUsers("");
-      loadMenuImages();
     })
     .catch(function (err) {
       lock.hidden = false;
