@@ -167,11 +167,32 @@
     }
   ];
 
+  /* Inline line-icons (illy-style mobile chrome) */
+  var ICON = {
+    burger: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
+    close: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    person: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+    bag: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>'
+  };
+
   B.renderChrome = function (active) {
     var logo = rootPath("assets/www.illy.com/on/demandware.static/Sites-illy_US_SFRA-Site/-/default/dwa1d7fec0/images/logo-illy.0d478fb603.svg");
+
+    var drawerLinks = NAV.map(function (n) {
+      var is = (n.active === active) ? ' is-active' : '';
+      var sub = n.links.map(function (link) {
+        return '<a class="bx-drawer__sublink" href="' + link[1] + '">' + link[0] + '</a>';
+      }).join('');
+      return '<div class="bx-drawer__group">' +
+        '<a class="bx-drawer__link' + is + '" href="' + n.href + '">' + n.label + '</a>' +
+        '<div class="bx-drawer__sub">' + sub + '</div>' +
+      '</div>';
+    }).join('');
+
     var header =
       '<div class="bx-topbar">Order online with Toast &nbsp;|&nbsp; National Harbor pickup</div>' +
       '<header class="bx-header">' +
+        '<button class="bx-burger" type="button" aria-label="Open menu" aria-expanded="false" data-drawer-open>' + ICON.burger + '</button>' +
         '<a class="bx-header__brand" href="' + rootPath("index.html") + '">' +
           '<img src="' + logo + '" alt="illy" />' +
           '<span>National Harbor</span>' +
@@ -196,13 +217,33 @@
           }).join('') +
         '</nav>' +
         '<div class="bx-header__right">' +
-          '<a class="bx-btn" href="' + pagePath("menu.html") + '" style="padding:9px 16px;font-size:13px">Order Online</a>' +
+          '<a class="bx-btn bx-header__order" href="' + pagePath("menu.html") + '" style="padding:9px 16px;font-size:13px">Order Online</a>' +
           '<a class="bx-cartlink" href="' + pagePath("account.html") + '">Account</a>' +
           '<a class="bx-cartlink" href="' + pagePath("cart.html") + '">Cart' +
             '<span class="bx-cartlink__count" data-cart-count>0</span>' +
           '</a>' +
+          '<a class="bx-iconlink" href="' + pagePath("account.html") + '" aria-label="Account">' + ICON.person + '</a>' +
+          '<a class="bx-iconlink" href="' + pagePath("cart.html") + '" aria-label="Cart">' + ICON.bag +
+            '<span class="bx-iconlink__count" data-cart-count>0</span>' +
+          '</a>' +
         '</div>' +
-      '</header>';
+      '</header>' +
+      '<div class="bx-drawer" data-drawer hidden>' +
+        '<div class="bx-drawer__scrim" data-drawer-close></div>' +
+        '<aside class="bx-drawer__panel" role="dialog" aria-modal="true" aria-label="Menu">' +
+          '<div class="bx-drawer__head">' +
+            '<img class="bx-drawer__logo" src="' + logo + '" alt="illy" />' +
+            '<button class="bx-drawer__close" type="button" aria-label="Close menu" data-drawer-close>' + ICON.close + '</button>' +
+          '</div>' +
+          '<a class="bx-btn bx-btn--lg bx-drawer__cta" href="' + pagePath("menu.html") + '">Order Online</a>' +
+          '<nav class="bx-drawer__nav">' + drawerLinks + '</nav>' +
+          '<div class="bx-drawer__foot">' +
+            '<a href="' + pagePath("account.html") + '">Account</a>' +
+            '<a href="' + pagePath("cart.html") + '">Cart</a>' +
+            '<a href="' + pagePath("store.html") + '">Hours &amp; Location</a>' +
+          '</div>' +
+        '</aside>' +
+      '</div>';
 
     var footer =
       '<footer class="bx-footer">' +
@@ -242,8 +283,38 @@
     if (host) host.outerHTML = header;
     var fhost = document.querySelector("[data-chrome-footer]");
     if (fhost) fhost.outerHTML = footer;
+    wireDrawer();
     renderCartCount();
   };
+
+  /* ---------- Mobile drawer ---------- */
+  function wireDrawer() {
+    var drawer = document.querySelector("[data-drawer]");
+    var burger = document.querySelector("[data-drawer-open]");
+    if (!drawer || !burger || drawer.dataset.wired === "1") return;
+    drawer.dataset.wired = "1";
+
+    function open() {
+      drawer.hidden = false;
+      requestAnimationFrame(function () { drawer.classList.add("is-open"); });
+      burger.setAttribute("aria-expanded", "true");
+      document.body.classList.add("bx-noscroll");
+    }
+    function close() {
+      drawer.classList.remove("is-open");
+      burger.setAttribute("aria-expanded", "false");
+      document.body.classList.remove("bx-noscroll");
+      setTimeout(function () { drawer.hidden = true; }, 260);
+    }
+
+    burger.addEventListener("click", open);
+    drawer.querySelectorAll("[data-drawer-close]").forEach(function (el) {
+      el.addEventListener("click", close);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !drawer.hidden) close();
+    });
+  }
 
   function renderCartCount() {
     var n = count();
