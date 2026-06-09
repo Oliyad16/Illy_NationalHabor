@@ -317,7 +317,11 @@
   }
 
   function renderCartCount() {
-    var n = count();
+    /* Use B.cart.count() — not the private retail-only count() — so café line
+       items (added on menu.html/section.html via the wrapped cart in
+       menu-cart.js) are included in the header badge. Without this the badge
+       never reflected café orders. */
+    var n = (B.cart && B.cart.count) ? B.cart.count() : count();
     document.querySelectorAll("[data-cart-count]").forEach(function (el) {
       el.textContent = String(n);
       el.style.display = n > 0 ? "inline-flex" : "none";

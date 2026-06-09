@@ -188,12 +188,11 @@
       if (!btn || btn.disabled) return;
       var item = M.findItem(btn.getAttribute("data-item"));
       if (!item) return;
-      if (hasOptions(item)) {
-        openItem(item);
-      } else {
-        B.cafeCart.add(item, { qty: 1 });
-        B.toast('Added "' + item.name + '" to your pickup cart.');
-      }
+      /* Tapping any item — with or without options — opens the detail popup
+         (enlarged photo, name, description, price, qty + Add, and an X to
+         close). Adding to the cart happens from inside the modal so the
+         header badge always refreshes and the user gets clear confirmation. */
+      openItem(item);
     });
   }
 
