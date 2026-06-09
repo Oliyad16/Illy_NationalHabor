@@ -4,35 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Account — illy Caffè National Harbor</title>
-<meta name="description" content="Create or sign in to an illy Caffè National Harbor account preview for rewards, preferences, and order history.">
+<meta name="description" content="Sign in to illy Caffè National Harbor with Clerk authentication.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="branch.css">
 <style>
-  .acct-layout {
-    display: grid;
-    grid-template-columns: minmax(300px, .9fr) 1.1fr;
-    gap: 34px;
-    align-items: start;
-  }
-  .acct-panel {
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: #fff;
-    padding: 28px;
-  }
+  /* ---- signed-out sign-in panel ---- */
+  .acct-layout { display: grid; grid-template-columns: minmax(320px, .95fr) 1.05fr; gap: 34px; align-items: start; }
+  .acct-panel,
+  .acct-benefit { border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  .acct-panel { min-height: 360px; padding: 28px; }
   .acct-panel h2 { margin: 0 0 10px; color: var(--brown); font-size: 24px; font-weight: 500; }
   .acct-panel p { margin: 0 0 22px; color: #66554a; line-height: 1.55; }
-  .acct-form { display: grid; gap: 14px; }
-  .acct-field label { display: block; margin-bottom: 7px; color: var(--brown); font-size: 13px; font-weight: 800; }
-  .acct-field input {
-    width: 100%;
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 12px 13px;
-    font: inherit;
-  }
-  .acct-note {
+  .acct-status {
     border-left: 4px solid var(--red);
     background: var(--cream);
     padding: 16px;
@@ -40,12 +24,86 @@
     font-size: 14px;
     line-height: 1.5;
   }
+  .acct-status[hidden],
+  .acct-dash[hidden],
+  .acct-login[hidden] { display: none; }
   .acct-benefits { display: grid; gap: 16px; }
-  .acct-benefit { padding: 20px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  .acct-benefit { padding: 20px; }
   .acct-benefit strong { display: block; color: var(--brown); margin-bottom: 7px; }
   .acct-benefit span { display: block; color: #66554a; font-size: 14px; line-height: 1.5; }
-  @media (max-width: 860px) {
+  #clerk-sign-in { min-height: 320px; }
+
+  /* ---- signed-in dashboard ---- */
+  .dash-greet {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap; margin-bottom: 8px;
+  }
+  .dash-greet h2 { margin: 0; color: var(--brown); font-size: 34px; font-weight: 500; }
+  .dash-greet .dash-greet__right { display: flex; align-items: center; gap: 14px; }
+  .dash-role {
+    display: inline-flex; align-items: center; min-height: 28px; padding: 0 11px;
+    border-radius: 4px; background: var(--cream); color: var(--red);
+    font-size: 12px; font-weight: 800; text-transform: uppercase;
+  }
+  .dash-rewardline { display: flex; align-items: center; gap: 8px; color: #66554a; margin: 0 0 24px; font-size: 15px; }
+  .dash-rewardline svg { flex: 0 0 auto; }
+
+  .dash-grid { display: grid; grid-template-columns: 220px 1fr; gap: 30px; align-items: start; }
+  .dash-side { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 24px; }
+  .dash-side a {
+    display: block; padding: 11px 14px; border-radius: 6px;
+    color: var(--brown-deep); text-decoration: none; font-weight: 500; font-size: 15px;
+  }
+  .dash-side a:hover { background: var(--cream); }
+  .dash-side a.is-active { background: var(--brown); color: #fff; }
+
+  .dash-main { display: flex; flex-direction: column; gap: 26px; }
+  .dash-block { scroll-margin-top: 90px; }
+  .dash-block__head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-bottom: 14px;
+  }
+  .dash-block__head h3 { margin: 0; color: var(--brown); font-size: 22px; font-weight: 500; }
+  .dash-block__head a, .dash-block__head button.linklike {
+    background: none; border: 0; cursor: pointer;
+    color: var(--brown); font: inherit; font-weight: 700; font-size: 14px;
+    text-decoration: underline; text-underline-offset: 4px; padding: 0;
+  }
+  .dash-card {
+    display: flex; align-items: flex-start; gap: 18px;
+    border: 1px solid var(--line); border-radius: 8px; background: #fff; padding: 22px 24px;
+  }
+  .dash-card__icon {
+    flex: 0 0 auto; width: 44px; height: 44px; border-radius: 8px;
+    background: var(--cream); display: flex; align-items: center; justify-content: center;
+    color: var(--brown);
+  }
+  .dash-card__body { flex: 1 1 auto; }
+  .dash-card__body strong { display: block; color: var(--brown); font-size: 17px; margin-bottom: 4px; }
+  .dash-card__body span { display: block; color: #66554a; font-size: 14px; line-height: 1.5; }
+  .dash-card__body .dash-soon {
+    display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .04em; color: #8a7a6e;
+  }
+
+  .dash-stat { display: flex; gap: 30px; flex-wrap: wrap; }
+  .dash-stat__n { font-size: 30px; font-weight: 800; color: var(--brown); line-height: 1; }
+  .dash-stat__l { font-size: 13px; color: #8a7a6e; font-weight: 700; margin-top: 6px; }
+
+  .dash-form { display: grid; gap: 14px; max-width: 420px; margin-top: 4px; }
+  .dash-form label { font-size: 13px; font-weight: 700; color: var(--brown); display: block; margin-bottom: 5px; }
+  .dash-form input, .dash-form select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px;
+    font: inherit; color: var(--brown-deep); background: #fff;
+  }
+  .dash-form__msg { font-size: 13px; min-height: 18px; }
+  .dash-form__msg.is-ok { color: #2e7d32; }
+  .dash-form__msg.is-err { color: var(--red); }
+
+  @media (max-width: 900px) {
     .acct-layout { grid-template-columns: 1fr; }
+    .dash-grid { grid-template-columns: 1fr; }
+    .dash-side { position: static; flex-direction: row; flex-wrap: wrap; }
   }
 </style>
 </head>
@@ -54,55 +112,171 @@
 
 <main class="bx-wrap">
   <nav class="bx-breadcrumb"><a href="../index.html">Home</a> / <span>Account</span></nav>
-  <div class="bx-pagehead">
-    <p class="bx-eyebrow">Account preview</p>
-    <h1>Create your illy National Harbor account</h1>
-    <p>Use this screen as the customer-facing account design. Secure account creation will be connected to backend authentication before accepting real customer credentials.</p>
+
+  <!-- Signed-out: hero + Clerk sign-in -->
+  <div class="acct-login" id="login-panel" hidden>
+    <div class="bx-pagehead">
+      <p class="bx-eyebrow">Your account</p>
+      <h1>Sign in to illy National Harbor</h1>
+      <p>One account for everything — rewards, saved pickup preferences, and your order history at National Harbor.</p>
+    </div>
+    <div class="acct-layout">
+      <section class="acct-panel">
+        <h2>Login or create account</h2>
+        <p>Sign in with email, a one-time code, or your Apple, Google, or Facebook account.</p>
+        <div id="clerk-sign-in"></div>
+      </section>
+      <section class="acct-benefits" aria-label="Member benefits">
+        <div class="acct-benefit">
+          <strong>Earn rewards</strong>
+          <span>Collect points on every National Harbor pickup and unlock free drinks.</span>
+        </div>
+        <div class="acct-benefit">
+          <strong>Faster pickup</strong>
+          <span>Save your pickup style and mobile number so checkout is quicker next time.</span>
+        </div>
+        <div class="acct-benefit">
+          <strong>Order history</strong>
+          <span>Reorder your favorites and track current pickups, all in one place.</span>
+        </div>
+        <div class="acct-benefit">
+          <strong>Secure sign-in</strong>
+          <span>Your account is protected with modern authentication — no passwords stored on our site.</span>
+        </div>
+      </section>
+    </div>
   </div>
 
-  <div class="acct-layout">
-    <section class="acct-panel">
-      <h2>Join or sign in</h2>
-      <p>Accounts will support saved preferences, rewards, order history, and future Toast-linked pickup records.</p>
-      <form class="acct-form" action="#" id="account-form">
-        <div class="acct-field">
-          <label for="acct-name">Name</label>
-          <input id="acct-name" autocomplete="name" placeholder="Full name">
-        </div>
-        <div class="acct-field">
-          <label for="acct-email">Email</label>
-          <input id="acct-email" type="email" autocomplete="email" placeholder="you@example.com">
-        </div>
-        <div class="acct-field">
-          <label for="acct-phone">Phone</label>
-          <input id="acct-phone" autocomplete="tel" placeholder="+1">
-        </div>
-        <button class="bx-btn bx-btn--full" type="submit">Continue</button>
-      </form>
-      <div class="acct-note" style="margin-top:18px">
-        This preview does not store passwords or customer data. Real authentication should use Clerk/Auth0 plus a database and server-side route protection.
+  <!-- Signed-in: customer dashboard -->
+  <div class="acct-dash" id="dash-panel" hidden>
+    <div class="dash-greet">
+      <h2 id="dash-hi">Hi</h2>
+      <div class="dash-greet__right">
+        <span class="dash-role" id="dash-role"></span>
+        <a class="bx-btn" id="dash-admin-link" href="admin.html" hidden>Admin dashboard</a>
+        <div id="clerk-user-button"></div>
       </div>
-    </section>
+    </div>
+    <p class="dash-rewardline">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d12420" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+      Welcome back — earn rewards on every National Harbor pickup.
+    </p>
 
-    <section class="acct-benefits" aria-label="Account benefits">
-      <div class="acct-benefit">
-        <strong>Saved café preferences</strong>
-        <span>Favorite drinks, milk choices, syrups, pickup notes, and contact details.</span>
+    <div class="dash-grid">
+      <nav class="dash-side" id="dash-side" aria-label="Account sections">
+        <a href="#sec-account" class="is-active">My account</a>
+        <a href="#sec-rewards">Rewards</a>
+        <a href="#sec-orders">Last Orders</a>
+        <a href="#sec-addresses">Addresses</a>
+        <a href="#sec-details">Account Details</a>
+      </nav>
+
+      <div class="dash-main">
+        <!-- My account / pickup preference -->
+        <section class="dash-block" id="sec-account">
+          <div class="dash-block__head"><h3>My account</h3></div>
+          <div class="dash-card">
+            <div class="dash-card__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="dash-card__body" style="width:100%">
+              <strong>Saved pickup preference</strong>
+              <span>Tell us how you usually pick up so checkout is faster next time.</span>
+              <form class="dash-form" id="profile-form">
+                <div>
+                  <label for="pf-pickup">Pickup style</label>
+                  <select id="pf-pickup" name="pickupPreference">
+                    <option value="asap">As soon as ready</option>
+                    <option value="scheduled">Scheduled time</option>
+                    <option value="curbside">Curbside</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="pf-phone">Mobile for pickup texts</label>
+                  <input id="pf-phone" name="phone" type="tel" inputmode="tel" placeholder="(202) 555-0123" autocomplete="tel">
+                </div>
+                <div class="dash-form__msg" id="profile-msg" role="status"></div>
+                <div><button type="submit" class="bx-btn" id="profile-save">Save preferences</button></div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- Rewards -->
+        <section class="dash-block" id="sec-rewards">
+          <div class="dash-block__head"><h3>Rewards</h3></div>
+          <div class="dash-card">
+            <div class="dash-card__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8.5 22 9.3 17 14 18.5 21 12 17.5 5.5 21 7 14 2 9.3 9 8.5 12 2"/></svg>
+            </div>
+            <div class="dash-card__body">
+              <strong>Your rewards balance</strong>
+              <span>Track points toward free drinks at National Harbor.</span>
+              <div class="dash-stat" style="margin-top:14px">
+                <div><div class="dash-stat__n">0</div><div class="dash-stat__l">Points</div></div>
+                <div><div class="dash-stat__n">Bronze</div><div class="dash-stat__l">Tier</div></div>
+              </div>
+              <span class="dash-soon">Live balances coming soon</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Last Orders -->
+        <section class="dash-block" id="sec-orders">
+          <div class="dash-block__head">
+            <h3>Last Orders</h3>
+            <a href="menu.html">Continue shopping</a>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <div class="dash-card__body">
+              <strong>Track your orders</strong>
+              <span>Your National Harbor pickup orders will appear here with real-time status.</span>
+              <span class="dash-soon">Connects to Toast order history</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Addresses -->
+        <section class="dash-block" id="sec-addresses">
+          <div class="dash-block__head">
+            <h3>Addresses</h3>
+            <a href="#sec-account" id="addr-edit">Edit pickup info</a>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="dash-card__body">
+              <strong>Pickup location</strong>
+              <span>illy Caffè National Harbor — 152 Waterfront St, National Harbor, MD. Saved pickup preferences make reordering quick.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Account Details -->
+        <section class="dash-block" id="sec-details">
+          <div class="dash-block__head">
+            <h3>Account Details</h3>
+            <button type="button" class="linklike" id="manage-account">Manage</button>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6 12 13 2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+            </div>
+            <div class="dash-card__body">
+              <strong id="details-email">Manage your account</strong>
+              <span>Update your name, email, password, and connected sign-in methods through Clerk.</span>
+            </div>
+          </div>
+        </section>
       </div>
-      <div class="acct-benefit">
-        <strong>Rewards-ready profile</strong>
-        <span>Free, Gold, and VIP reward experiences can live behind a secure login.</span>
-      </div>
-      <div class="acct-benefit">
-        <strong>Toast order connection</strong>
-        <span>Future backend work can map site accounts to Toast order IDs and pickup records.</span>
-      </div>
-      <div class="acct-benefit">
-        <strong>Admin and staff roles</strong>
-        <span>The same auth foundation supports protected admin dashboard access later.</span>
-      </div>
-    </section>
+    </div>
   </div>
+
+  <div class="acct-status" id="account-status">Loading Clerk…</div>
 </main>
 
 <div data-chrome-footer></div>
@@ -110,14 +284,145 @@
 <script src="../branch-config.js"></script>
 <script src="catalog.js"></script>
 <script src="branch.js"></script>
+<script src="clerk-auth.js"></script>
 <script>
 (function () {
   var B = window.ILLY_BRANCH;
   B.renderChrome("Account");
-  document.getElementById("account-form").addEventListener("submit", function (event) {
-    event.preventDefault();
-    B.toast("Account creation needs secure backend auth before collecting real customer data.");
-  });
+
+  var loginPanel = document.getElementById("login-panel");
+  var dashPanel = document.getElementById("dash-panel");
+  var status = document.getElementById("account-status");
+
+  var clerkAppearance = {
+    variables: {
+      colorPrimary: "#512c1f",
+      colorText: "#4f3f35",
+      colorBackground: "#ffffff",
+      borderRadius: "8px",
+      fontFamily: "Manrope, system-ui, sans-serif"
+    },
+    elements: {
+      footer: { display: "none" },
+      rootBox: { width: "100%", display: "flex", justifyContent: "center" },
+      cardBox: { width: "100%", maxWidth: "440px", boxShadow: "none" },
+      card: { boxShadow: "none", border: "1px solid #e7ded6" },
+      formButtonPrimary: { fontSize: "15px" }
+    }
+  };
+
+  function showStatus(message) {
+    status.hidden = !message;
+    status.textContent = message || "";
+  }
+
+  function firstName(user) {
+    var name = (user.name || "").trim();
+    if (name) return name.split(/\s+/)[0];
+    return (user.email || "there").split("@")[0];
+  }
+
+  function wireSidebar() {
+    var links = Array.prototype.slice.call(document.querySelectorAll("#dash-side a"));
+    links.forEach(function (link) {
+      link.addEventListener("click", function () {
+        links.forEach(function (l) { l.classList.remove("is-active"); });
+        link.classList.add("is-active");
+      });
+    });
+  }
+
+  function loadProfile() {
+    window.ILLY_CLERK.api("/api/account/profile")
+      .then(function (json) {
+        var p = json.profile || {};
+        if (p.phone) document.getElementById("pf-phone").value = p.phone;
+        if (p.pickupPreference) document.getElementById("pf-pickup").value = p.pickupPreference;
+      })
+      .catch(function () { /* non-fatal: leave defaults */ });
+  }
+
+  function wireProfileForm() {
+    var form = document.getElementById("profile-form");
+    var msg = document.getElementById("profile-msg");
+    var btn = document.getElementById("profile-save");
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      msg.className = "dash-form__msg";
+      msg.textContent = "";
+      btn.disabled = true;
+      btn.textContent = "Saving…";
+      window.ILLY_CLERK.api("/api/account/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: document.getElementById("pf-phone").value,
+          pickupPreference: document.getElementById("pf-pickup").value
+        })
+      })
+        .then(function () {
+          msg.className = "dash-form__msg is-ok";
+          msg.textContent = "Saved.";
+        })
+        .catch(function (err) {
+          msg.className = "dash-form__msg is-err";
+          msg.textContent = err.message || "Could not save.";
+        })
+        .then(function () {
+          btn.disabled = false;
+          btn.textContent = "Save preferences";
+        });
+    });
+  }
+
+  function showDashboard(clerk, user) {
+    loginPanel.hidden = true;
+    dashPanel.hidden = false;
+    document.getElementById("dash-hi").textContent = "Hi, " + firstName(user);
+    document.getElementById("dash-role").textContent = window.ILLY_CLERK.roleLabel(user.role);
+    document.getElementById("dash-admin-link").hidden = !user.isAdmin;
+    document.getElementById("details-email").textContent = user.email || "Manage your account";
+
+    clerk.mountUserButton(document.getElementById("clerk-user-button"), {
+      afterSignOutUrl: "account.html",
+      appearance: clerkAppearance
+    });
+
+    document.getElementById("manage-account").addEventListener("click", function () {
+      clerk.openUserProfile({ appearance: clerkAppearance });
+    });
+
+    wireSidebar();
+    wireProfileForm();
+    loadProfile();
+  }
+
+  function showSignIn(clerk) {
+    dashPanel.hidden = true;
+    loginPanel.hidden = false;
+    clerk.mountSignIn(document.getElementById("clerk-sign-in"), {
+      routing: "hash",
+      afterSignInUrl: "account.html",
+      afterSignUpUrl: "account.html",
+      appearance: clerkAppearance
+    });
+  }
+
+  window.ILLY_CLERK.load()
+    .then(function (clerk) {
+      if (!clerk.isSignedIn) {
+        showStatus("");
+        showSignIn(clerk);
+        return;
+      }
+      return window.ILLY_CLERK.api("/api/auth/me").then(function (json) {
+        showStatus("");
+        showDashboard(clerk, json.user);
+      });
+    })
+    .catch(function (err) {
+      showStatus(err.message);
+    });
 })();
 </script>
 </body>

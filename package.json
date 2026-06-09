@@ -7,10 +7,14 @@
   "scripts": {
     "build:overrides": "node scripts/build-overrides.mjs",
     "sync:menu": "node scripts/sync-menu.mjs",
-    "test": "node scripts/test-toast.mjs",
-    "dev": "python3 -m http.server 4173"
+    "test": "node scripts/test-toast.mjs && node scripts/test-auth.mjs",
+    "dev": "set -a; [ -f .env.local ] && . ./.env.local; [ -f .env.development.local ] && . ./.env.development.local; set +a; npx -y vercel@latest dev --listen 4173 --yes",
+    "dev:static": "python3 -m http.server 4173"
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@clerk/backend": "^3.5.0"
   }
 }

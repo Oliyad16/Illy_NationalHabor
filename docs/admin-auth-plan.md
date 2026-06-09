@@ -2,18 +2,54 @@
 
 ## Current state
 
-The project is a static HTML/CSS/JavaScript site. It has no backend runtime, database, session storage, password handling, or protected route layer.
+The project is a static HTML/CSS/JavaScript site with Vercel serverless API routes.
 
-Because of that, a real admin dashboard and real user accounts cannot be made secure inside the current static-only architecture. Any client-side-only login would be cosmetic and bypassable.
+Authentication now uses Clerk on the frontend and Vercel API routes for backend role checks. The browser signs in through ClerkJS, then sends a Clerk session token to `/api/auth/me`. The backend verifies that token with Clerk before returning the user role.
+
+Configured roles:
+
+- `customer`
+- `admin`
+- `super_admin`
+
+Super admin email:
+
+- `oliyad@thelivingstonefoundation.com`
+
+## Environment variables
+
+Set these in Vercel before using auth in production:
+
+- `CLERK_PUBLISHABLE_KEY`: Clerk publishable key for frontend sign-in
+- `CLERK_SECRET_KEY`: Clerk secret key for backend token verification and user lookup
+- `CLERK_FRONTEND_API_URL`: optional Clerk frontend API host override from the JavaScript quick-copy snippet
+- `CLERK_AUTHORIZED_PARTIES`: optional comma-separated allowed origins for token verification
+- `ADMIN_EMAILS`: optional comma-separated admin email allowlist, excluding the super admin email
+
+Local setup:
+
+- `npx clerk auth login`
+- `npx clerk link --app app_3EsL2eeMT6M9fZPFMjxjKxia1qE`
+- `npx clerk env pull --file .env.development.local`
+- `npm run dev`
+
+The local dev script uses Vercel dev because the account and admin pages call `/api/auth/*` serverless functions. `npm run dev:static` is still available for static-only page checks.
+
+Role assignment:
+
+- `oliyad@thelivingstonefoundation.com` is always treated as `super_admin` server-side.
+- Other users can be assigned roles with Clerk `publicMetadata.role` or `privateMetadata.role`.
+- Valid role values are `customer`, `admin`, and `super_admin`.
+- If no role metadata is present, users default to `customer`.
 
 ## Recommended implementation
 
-Move the operational pieces behind a backend app while keeping the current visual design.
+For a broader production system, keep Clerk for identity and move operational data behind a database-backed backend app while preserving the current visual design.
 
 Recommended stack:
 
 - Next.js App Router for pages, API routes, and server-rendered protected views
-- Clerk or Auth0 for authentication
+- Clerk for authentication
 - Role-based access control with at least `customer`, `staff`, and `admin`
 - Postgres for accounts, order drafts, rewards, gift card records, and audit history
 - Toast API integration server-side only

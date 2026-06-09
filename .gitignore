@@ -1,8 +1,15 @@
 .DS_Store
 .claude/
+.vercel/
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .env
 .env.*
+!.env.example
+.vercel
+
+# Local Claude Code tooling
+.agents/
+skills-lock.json
