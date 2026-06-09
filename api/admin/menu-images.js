@@ -29,6 +29,32 @@ function defaultPhotoUrl(item) {
   return "";
 }
 
+function titleCase(s) {
+  return String(s || "")
+    .split(/\s+/)
+    .map(function (w) { return w ? w.charAt(0).toUpperCase() + w.slice(1) : w; })
+    .join(" ");
+}
+
+// Fallback item list built from the baked menu overrides (lib/menu-overrides.js),
+// used when Toast is unconfigured/unreachable so the image manager ALWAYS lists
+// every item and admins can still set photos. The byName map is keyed by the
+// lowercased item name and carries the stable slug id + any baked photo/img.
+function bakedItems() {
+  const byName = overrides.byName || {};
+  return Object.keys(byName).map(function (name) {
+    const o = byName[name] || {};
+    return {
+      id: o.id || name,
+      name: titleCase(name),
+      // No category grouping in the baked map; bucket them together.
+      _category: "Menu",
+      img: o.img,
+      photo: o.photo
+    };
+  });
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== "GET" && req.method !== "PUT") {
     res.setHeader("Allow", "GET, PUT");
@@ -68,35 +94,60 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  // GET — join the live menu with current overrides.
+  // GET — list every menu item joined with current overrides.
+  // Source the item list from live Toast when available; otherwise fall back to
+  // the baked menu so the manager ALWAYS works (no hard dependency on Toast).
+  let records = {};
   try {
-    const [menu, records] = await Promise.all([
-      toast.getMenu(process.env, { overrides: overrides.byName }),
-      images.getImageRecords(process.env).catch(function () { return {}; })
-    ]);
+    records = await images.getImageRecords(process.env);
+  } catch (e) {
+    records = {};
+  }
 
-    const items = [];
+  // Build [{ id, name, category, img?, photo? }] from Toast or the baked menu.
+  let sourceItems = [];
+  let source = "baked";
+  try {
+    const menu = await toast.getMenu(process.env, { overrides: overrides.byName });
     (menu.categories || []).forEach(function (cat) {
       (cat.items || []).forEach(function (it) {
-        const rec = records[it.id];
-        const overrideUrl = rec ? (typeof rec === "object" ? rec.url : rec) : "";
-        const def = defaultPhotoUrl(it);
-        items.push({
-          id: it.id,
-          name: it.name,
-          category: cat.name,
-          defaultPhoto: def,
-          overrideUrl: overrideUrl || "",
-          currentUrl: overrideUrl || def || "",
-          updatedAt: rec && rec.updatedAt ? rec.updatedAt : null,
-          updatedBy: rec && rec.updatedBy ? rec.updatedBy : ""
-        });
+        sourceItems.push({ id: it.id, name: it.name, _category: cat.name, img: it.img, photo: it.photo });
       });
     });
-
-    res.status(200).json({ ok: true, items: items, count: items.length });
-  } catch (err) {
-    console.error("[/api/admin/menu-images GET] failed:", err && err.message);
-    res.status(502).json({ error: "menu_unavailable", message: "Could not load the menu from Toast." });
+    if (sourceItems.length) source = "toast";
+  } catch (e) {
+    // Toast off/unreachable — fall back below.
+    sourceItems = [];
   }
+  if (!sourceItems.length) {
+    sourceItems = bakedItems();
+    source = "baked";
+  }
+
+  // De-dupe by id (the baked map can hold a name twice via modifiers, etc.).
+  const seen = {};
+  const items = [];
+  sourceItems.forEach(function (it) {
+    if (!it.id || seen[it.id]) return;
+    seen[it.id] = true;
+    const rec = records[it.id];
+    const overrideUrl = rec ? (typeof rec === "object" ? rec.url : rec) : "";
+    const def = defaultPhotoUrl(it);
+    items.push({
+      id: it.id,
+      name: it.name,
+      category: it._category || "Menu",
+      defaultPhoto: def,
+      overrideUrl: overrideUrl || "",
+      currentUrl: overrideUrl || def || "",
+      updatedAt: rec && rec.updatedAt ? rec.updatedAt : null,
+      updatedBy: rec && rec.updatedBy ? rec.updatedBy : ""
+    });
+  });
+
+  items.sort(function (a, b) {
+    return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
+  });
+
+  res.status(200).json({ ok: true, items: items, count: items.length, source: source });
 };
