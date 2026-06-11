@@ -56,7 +56,24 @@
     var menuStore = window.ILLY_MENU && window.ILLY_MENU.store;
     return (menuStore && menuStore.orderUrl) ||
       store.toastOrderUrl ||
-      "https://order.toasttab.com/online/illy-caffe-oxon-hill?diningOption=takeout";
+      "https://order.toasttab.com/online/illy-caffe-oxon-hill";
+  };
+
+  /* Deep-link straight to a specific item's customization modal on the café's
+     Toast ordering page. Toast's URL pattern is:
+        <orderUrl>/item-<slug>_<TOAST_ITEM_GUID>
+     The GUID comes from the live /api/menu fetch (Toast item guid). If an item
+     has no guid (e.g. the static fallback menu when Toast is unreachable), we
+     fall back to the menu homepage so the link always works. */
+  B.toastItemUrl = function (item) {
+    var base = B.toastOrderUrl().replace(/\/+$/, "");
+    if (!item || !item.guid) return base;
+    var slug = String(item.name || "item")
+      .toLowerCase()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "item";
+    return base + "/item-" + slug + "_" + item.guid;
   };
 
   /* ---------- Toast ---------- */

@@ -1,5 +1,12 @@
 # Online ordering with Stripe payment → Toast POS
 
+> **⚠️ SUPERSEDED (2026-06-10).** This Stripe pay-online flow was removed from the
+> codebase. Direct order injection into Toast requires the `orders.orders:write`
+> scope, which a single location cannot get (read-only Standard API Access only).
+> See **[online-ordering-roadmap.md](online-ordering-roadmap.md)** for the current
+> plan: interim Toast-page handoff now, Zuppler as the recommended path to keep
+> checkout on our own site. This doc is kept for historical reference only.
+
 Customers pay by card on the website (Stripe), and the **paid** order is pushed
 into the café's Toast POS. The site never stores card data (Stripe Elements
 hosts the card field), and we never keep money for an order the kitchen didn't
