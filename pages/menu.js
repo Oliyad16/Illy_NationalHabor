@@ -21,8 +21,8 @@ window.ILLY_MENU.store = {
   addressLines: ["138 Waterfront Street", "Oxon Hill, MD 20745"],
   phoneDisplay: "+1 (301) 500-1077",
   phoneHref: "+13015001077",
-  hours: "Online ordering 8:00 AM – 6:10 PM",
-  orderUrl: "https://order.toasttab.com/online/illy-caffe-oxon-hill?diningOption=takeout"
+  hours: "Tue–Thu 8 AM–5:30 PM · Fri–Sun 8 AM–6:30 PM · Mon closed",
+  orderUrl: "https://order.toasttab.com/online/illy-caffe-oxon-hill"
 };
 
 /* Real item photos. Two sources:

@@ -32,19 +32,18 @@
 
   var fieldStyle = 'width:100%;padding:11px 12px;border:1px solid #e7ded6;border-radius:8px;font:inherit;margin:0 0 10px;box-sizing:border-box';
 
-  // Load availability + live menu in parallel before rendering. Payment is
-  // pay-at-café only: the order goes to Toast UNPAID and the customer pays at
-  // the counter on pickup, so the site never handles card data.
+  // Load availability + live menu in parallel before rendering. INTERIM: ordering
+  // and payment run on the café's Toast page, which enforces its own hours — so
+  // we only use /api/availability to show a heads-up banner. If it can't be
+  // reached we default to "open" rather than block the handoff.
   Promise.all([
     Promise.resolve(M.ready),
     fetch("/api/availability", { headers: { Accept: "application/json" } })
-      .then(function (r) { return r.json(); })
+      .then(function (r) { return r.ok ? r.json() : { open: true, reason: "", source: "unknown" }; })
       .catch(function () { return { open: true, reason: "", source: "unknown" }; })
   ]).then(function (results) {
     start(results[1]);
   });
-
-  function val(id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; }
 
   function start(avail) {
     var items = B.cart.items();
@@ -58,95 +57,39 @@
     }).join('');
 
     var open = !!avail.open;
+    // Heads-up only — Toast enforces its own ordering hours on its page, so we
+    // never block the handoff here; we just let the guest know it may be closed.
     var closedBanner = open ? '' :
       '<div style="background:#fbeae8;border:1px solid #f0c5c0;color:#8a2b22;border-radius:10px;padding:14px 16px;margin:0 0 18px;font-size:14px">⏰ ' +
-      (avail.reason || "Online ordering is currently closed.") + '</div>';
+      (avail.reason || "The café may be closed right now — Toast will show current availability.") + '</div>';
 
+    /* INTERIM checkout: online ordering + payment runs on the café's Toast page.
+       Direct order injection (POST /api/order) needs Toast's orders.orders:write,
+       which a single location can't get yet — so the primary action sends the
+       guest to Toast to finish and pay. (Re-enable the pay-at-café form once
+       Zuppler or direct Toast write access is live.) */
     root.innerHTML =
       '<div class="bx-pagehead"><h1>Checkout</h1>' +
-      '<p>Order ahead for pickup at National Harbor.</p></div>' +
+      '<p>Complete your order and pay securely on Toast.</p></div>' +
       closedBanner +
       '<div class="bx-pdp" style="align-items:start">' +
         '<div class="bx-store__card">' +
-          '<input id="cust-first" style="' + fieldStyle + '" placeholder="First name" autocomplete="given-name">' +
-          '<input id="cust-last" style="' + fieldStyle + '" placeholder="Last name" autocomplete="family-name">' +
-          '<input id="cust-phone" style="' + fieldStyle + '" placeholder="Mobile phone" inputmode="tel" autocomplete="tel">' +
-          '<input id="cust-email" style="' + fieldStyle + '" placeholder="Email (optional)" inputmode="email" autocomplete="email">' +
-          '<textarea id="cust-note" style="' + fieldStyle + ';min-height:60px;resize:vertical" placeholder="Notes for the café (optional)"></textarea>' +
-          '<div style="margin-top:8px"></div>' +
-          '<button class="bx-btn bx-btn--lg bx-btn--full" id="place-order"' + (open ? '' : ' disabled') + '>Order &amp; pay at café</button>' +
-          '<p id="order-msg" style="font-size:13px;margin:12px 0 0;min-height:18px" aria-live="polite"></p>' +
-          '<a class="bx-btn bx-btn--ghost bx-btn--full" style="margin-top:10px" href="menu.html">Keep browsing</a>' +
-          '<div style="margin-top:22px;padding-top:18px;border-top:1px solid #e7ded6">' +
-            '<a id="toast-checkout" style="font-size:13px;color:#8a7a6e;text-decoration:underline" href="#" target="_blank" rel="noopener">Prefer to order on Toast’s site instead?</a>' +
-            '<p style="font-size:12px;color:#b6a99c;margin:6px 0 0;line-height:1.5">Opens Toast’s ordering page with a fresh menu — your current cart won’t carry over, so you’ll re-add items there.</p>' +
-          '</div>' +
+          '<p style="font-size:14px;color:#6a584c;line-height:1.6;margin:0 0 16px">' +
+            'Online ordering and payment for ' + (store.name || 'the café') + ' happen on Toast, our ' +
+            'point-of-sale. Tap below to choose your items and pay — your order goes straight to the café’s kitchen.' +
+          '</p>' +
+          '<a class="bx-btn bx-btn--lg bx-btn--full" id="toast-checkout" target="_blank" rel="noopener" href="#">Order &amp; pay on Toast →</a>' +
+          '<p style="font-size:12px;color:#b6a99c;margin:10px 0 0;line-height:1.5">Opens Toast’s secure ordering page. Items in your draft below won’t carry over automatically — re-select them on Toast.</p>' +
+          '<a class="bx-btn bx-btn--ghost bx-btn--full" style="margin-top:14px" href="menu.html">Keep browsing the menu</a>' +
         '</div>' +
         '<aside class="bx-store__card">' +
-          '<h2>Order summary</h2>' + summary +
+          '<h2>Your draft</h2>' + summary +
           '<div style="display:flex;justify-content:space-between;margin-top:14px;font-size:18px"><span style="font-weight:700">Total</span><strong>' + B.money(B.cart.total()) + '</strong></div>' +
           '<div class="bx-pickup" style="margin-top:18px">📍 ' + (store.addressLines || []).join(', ') + '</div>' +
         '</aside>' +
       '</div>';
 
     document.getElementById("toast-checkout").href = B.toastOrderUrl();
-
-    if (!open) return; // closed: inputs visible, order action disabled — nothing to wire
-
-    wirePayAtCafe();
-  }
-
-  function cartPayload() {
-    return {
-      items: B.cart.items().map(function (it) { return { id: it.product.id, quantity: it.qty }; }),
-      customer: { firstName: val("cust-first"), lastName: val("cust-last"), phone: val("cust-phone"), email: val("cust-email") },
-      note: val("cust-note")
-    };
-  }
-
-  function requireContact(msgEl) {
-    if (!val("cust-first") || !val("cust-phone")) {
-      msgEl.style.color = "#b3261e";
-      msgEl.textContent = "Please add your first name and a phone number so the café can reach you.";
-      return false;
-    }
-    return true;
-  }
-
-  function showConfirmation(headline, sub) {
-    B.cart.clear();
-    root.innerHTML =
-      '<div class="bx-pagehead"><h1>' + headline + '</h1><p>' + sub + '</p>' +
-      '<div style="margin-top:18px"><a class="bx-btn bx-btn--lg" href="menu.html">Order more</a></div></div>';
-    window.scrollTo(0, 0);
-  }
-
-  /* ---- Pay at café (unpaid order to Toast) ---- */
-  function wirePayAtCafe() {
-    var btn = document.getElementById("place-order");
-    var msg = document.getElementById("order-msg");
-    btn.addEventListener("click", function () {
-      if (!requireContact(msg)) return;
-      btn.disabled = true;
-      msg.style.color = "#6a584c";
-      msg.textContent = "Sending your order to the café…";
-      fetch("/api/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(cartPayload())
-      })
-        .then(function (res) { return res.text().then(function (t) { var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {} return { ok: res.ok, body: j }; }); })
-        .then(function (r) {
-          if (!r.ok || !r.body || !r.body.ok) throw new Error((r.body && r.body.message) || "Order could not be placed right now.");
-          var num = r.body.displayNumber ? (" #" + r.body.displayNumber) : "";
-          showConfirmation("Order placed" + num + " 🎉", "Your order is in the café. Pay at the counter when you pick up at " + (store.addressLines || []).join(", ") + ".");
-        })
-        .catch(function (err) {
-          btn.disabled = false;
-          msg.style.color = "#b3261e";
-          msg.textContent = err.message;
-        });
-    });
   }
 })();
 </script>

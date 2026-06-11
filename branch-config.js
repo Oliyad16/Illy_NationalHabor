@@ -6,6 +6,8 @@ window.BRANCH_CONFIG = {
     "138 Waterfront Street",
     "Oxon Hill, MD 20745"
   ],
-  hours: "Online ordering 8:00 AM – 6:10 PM",
-  toastOrderUrl: "https://order.toasttab.com/online/illy-caffe-oxon-hill?diningOption=takeout"
+  hours: "Tue–Thu 8 AM–5:30 PM · Fri–Sun 8 AM–6:30 PM · Mon closed",
+  // Canonical Toast online-ordering page (from the restaurant config urls.orderOnline).
+  // Interim: the site hands customers here to order + pay until Zuppler/direct write access is live.
+  toastOrderUrl: "https://order.toasttab.com/online/illy-caffe-oxon-hill"
 };

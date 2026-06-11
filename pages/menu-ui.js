@@ -156,7 +156,9 @@
     var c = gather();
     var base = c.size ? c.size.price : current.price;
     var unit = c.modifiers.reduce(function (s, m) { return s + m.price; }, base);
-    els.add.textContent = "Add to order · " + B.money(unit * c.qty);
+    /* Interim: the button hands off to Toast to order + pay. Show the item's
+       price for context but label the action as the Toast handoff. */
+    els.add.textContent = "Order on Toast · " + B.money(unit * c.qty);
   }
 
   function closeModal() {
@@ -176,9 +178,15 @@
     });
     els.add.addEventListener("click", function () {
       if (!current) return;
-      B.cafeCart.add(current, gather());
-      B.toast('Added "' + current.name + '" to your pickup cart.');
+      /* The site is the storefront; ordering + payment happen on Toast. We
+         deep-link straight to THIS item's customization modal on the café's
+         Toast page (URL carries the Toast item GUID), so the guest lands on the
+         exact product, customizes, adds, and pays there. */
+      var name = current.name;
+      var url = B.toastItemUrl(current);
       closeModal();
+      B.toast('Opening "' + name + '" on Toast to order…');
+      window.open(url, "_blank", "noopener");
     });
   }
 
