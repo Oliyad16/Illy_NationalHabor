@@ -31,7 +31,22 @@
   .acct-benefit { padding: 20px; }
   .acct-benefit strong { display: block; color: var(--brown); margin-bottom: 7px; }
   .acct-benefit span { display: block; color: #66554a; font-size: 14px; line-height: 1.5; }
-  #clerk-sign-in { min-height: 320px; }
+  #clerk-sign-in, #clerk-sign-up { min-height: 320px; }
+  #clerk-sign-up[hidden], #clerk-sign-in[hidden] { display: none; }
+
+  /* Sign in / Create account toggle */
+  .auth-toggle {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    background: var(--cream); border: 1px solid var(--line); border-radius: 10px;
+    padding: 4px; margin: 0 0 14px;
+  }
+  .auth-toggle__btn {
+    border: 0; background: transparent; cursor: pointer; font: inherit;
+    font-weight: 700; font-size: 15px; color: var(--brown);
+    padding: 10px 12px; border-radius: 7px; transition: background .15s, color .15s;
+  }
+  .auth-toggle__btn.is-active { background: var(--brown); color: #fff; }
+  .auth-sub { margin: 0 0 18px; color: #66554a; line-height: 1.55; }
 
   /* ---- signed-in dashboard ---- */
   .dash-greet {
@@ -117,14 +132,18 @@
   <div class="acct-login" id="login-panel" hidden>
     <div class="bx-pagehead">
       <p class="bx-eyebrow">Your account</p>
-      <h1>Sign in to illy National Harbor</h1>
-      <p>One account for everything — rewards, saved pickup preferences, and your order history at National Harbor.</p>
+      <h1>Sign in or create your account</h1>
+      <p>One free account for everything — rewards, saved pickup preferences, and your order history at National Harbor.</p>
     </div>
     <div class="acct-layout">
       <section class="acct-panel">
-        <h2>Login or create account</h2>
-        <p>Sign in with email, a one-time code, or your Apple, Google, or Facebook account.</p>
+        <div class="auth-toggle" role="tablist" aria-label="Sign in or create account">
+          <button type="button" id="tab-signin" class="auth-toggle__btn is-active" role="tab" aria-selected="true">Sign in</button>
+          <button type="button" id="tab-signup" class="auth-toggle__btn" role="tab" aria-selected="false">Create account</button>
+        </div>
+        <p id="auth-sub" class="auth-sub">Welcome back — sign in with email, a code, or a social account.</p>
         <div id="clerk-sign-in"></div>
+        <div id="clerk-sign-up" hidden></div>
       </section>
       <section class="acct-benefits" aria-label="Member benefits">
         <div class="acct-benefit">
@@ -405,12 +424,59 @@
   function showSignIn(clerk) {
     dashPanel.hidden = true;
     loginPanel.hidden = false;
-    clerk.mountSignIn(document.getElementById("clerk-sign-in"), {
+
+    var signInEl = document.getElementById("clerk-sign-in");
+    var signUpEl = document.getElementById("clerk-sign-up");
+    var tabSignIn = document.getElementById("tab-signin");
+    var tabSignUp = document.getElementById("tab-signup");
+    var sub = document.getElementById("auth-sub");
+    var signUpMounted = false;
+
+    clerk.mountSignIn(signInEl, {
       routing: "hash",
       afterSignInUrl: "account.html",
       afterSignUpUrl: "account.html",
+      signUpUrl: "#/create-account",
       appearance: clerkAppearance
     });
+
+    function selectSignIn() {
+      tabSignIn.classList.add("is-active");
+      tabSignIn.setAttribute("aria-selected", "true");
+      tabSignUp.classList.remove("is-active");
+      tabSignUp.setAttribute("aria-selected", "false");
+      signUpEl.hidden = true;
+      signInEl.hidden = false;
+      sub.textContent = "Welcome back — sign in with email, a code, or a social account.";
+    }
+
+    function selectSignUp() {
+      tabSignUp.classList.add("is-active");
+      tabSignUp.setAttribute("aria-selected", "true");
+      tabSignIn.classList.remove("is-active");
+      tabSignIn.setAttribute("aria-selected", "false");
+      signInEl.hidden = true;
+      signUpEl.hidden = false;
+      sub.textContent = "Create your free illy National Harbor account to earn rewards and order faster.";
+      if (!signUpMounted) {
+        signUpMounted = true;
+        clerk.mountSignUp(signUpEl, {
+          routing: "hash",
+          afterSignUpUrl: "account.html",
+          afterSignInUrl: "account.html",
+          signInUrl: "#/sign-in",
+          appearance: clerkAppearance
+        });
+      }
+    }
+
+    tabSignIn.addEventListener("click", selectSignIn);
+    tabSignUp.addEventListener("click", selectSignUp);
+
+    // Deep-link: /account#create-account or ?signup opens registration directly.
+    if (/create-account|signup|sign-up/i.test(location.hash + location.search)) {
+      selectSignUp();
+    }
   }
 
   window.ILLY_CLERK.load()
