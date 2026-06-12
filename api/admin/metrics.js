@@ -1,4 +1,7 @@
-/* GET /api/admin/metrics?range=today|7d|30d&tzOffset=<min>  (admin + super_admin)
+/* GET /api/admin/metrics?range=today|7d|30d&tzOffset=<min>  (super_admin ONLY)
+ *
+ * Revenue figures are sensitive, so this endpoint is restricted to the super
+ * admin. Regular admins receive 403. Enforced server-side regardless of UI.
  *
  * Live business KPIs derived from the Toast POS for a single café:
  * revenue, order count, average order value, refunds, top sellers, a per-day
@@ -45,7 +48,7 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const me = await auth.requireRole(req, res, process.env, "admin");
+  const me = await auth.requireRole(req, res, process.env, "super_admin");
   if (!me) return;
 
   res.setHeader("Cache-Control", "no-store");
