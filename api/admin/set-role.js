@@ -1,15 +1,15 @@
 /* POST /api/admin/set-role  (super_admin ONLY)
- * Body: { email: string, role: "admin" | "customer" }
+ * Body: { email: string, role: "super_admin" | "admin" | "customer" }
  *
  * Promotes or demotes a user by writing publicMetadata.role via the Clerk
- * Backend API. The hardcoded super admin email can never be changed here, and
- * "super_admin" cannot be granted through this endpoint (super admin is
- * email-pinned server-side in lib/auth.js).
+ * Backend API. Only a super admin may call this, and only a super admin can
+ * grant "super_admin". The founder email (auth.SUPER_ADMIN_EMAIL) is always
+ * super admin and can never be modified here.
  */
 
 const auth = require("../../lib/auth");
 
-const ASSIGNABLE_ROLES = ["admin", "customer"];
+const ASSIGNABLE_ROLES = ["super_admin", "admin", "customer"];
 
 function readBody(req) {
   if (req.body && typeof req.body === "object") return req.body;
@@ -38,11 +38,15 @@ module.exports = async function handler(req, res) {
     return;
   }
   if (ASSIGNABLE_ROLES.indexOf(role) === -1) {
-    res.status(400).json({ error: "bad_request", message: "Role must be 'admin' or 'customer'." });
+    res.status(400).json({ error: "bad_request", message: "Role must be 'super_admin', 'admin', or 'customer'." });
     return;
   }
   if (email === auth.SUPER_ADMIN_EMAIL) {
-    res.status(400).json({ error: "protected_account", message: "The super admin account cannot be modified." });
+    res.status(400).json({ error: "protected_account", message: "The founder super admin account cannot be modified." });
+    return;
+  }
+  if (email === auth.normalizeEmail(me.email)) {
+    res.status(400).json({ error: "self_change", message: "You cannot change your own role." });
     return;
   }
 
@@ -55,8 +59,11 @@ module.exports = async function handler(req, res) {
       return;
     }
 
+    // Preserve any existing public metadata (e.g. phone, pickup prefs) and only
+    // change the role field.
+    const merged = Object.assign({}, target.publicMetadata || {}, { role: role });
     await clerk.users.updateUserMetadata(target.id, {
-      publicMetadata: { role: role }
+      publicMetadata: merged
     });
 
     res.setHeader("Cache-Control", "no-store");

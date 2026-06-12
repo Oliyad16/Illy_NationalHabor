@@ -288,7 +288,7 @@
       <div class="admin-head" style="margin-bottom:16px">
         <div>
           <h2>Super admin controls</h2>
-          <p>Promote a customer to admin, or revoke admin access. The super admin account is protected and cannot be changed here.</p>
+          <p>Promote a user to admin or super admin, or revoke access. The founder super admin account is protected and cannot be changed here.</p>
         </div>
       </div>
       <div class="super-panel">
@@ -302,6 +302,7 @@
             <label for="mg-role">Set role</label>
             <select id="mg-role">
               <option value="admin">Admin</option>
+              <option value="super_admin">Super admin</option>
               <option value="customer">Customer (revoke)</option>
             </select>
           </div>
@@ -495,10 +496,19 @@
       var role = u.role || "customer";
       var actions = "";
       if (state.isSuper) {
-        if (role === "super_admin" || u.email === state.myEmail) {
+        if (u.email === state.myEmail) {
+          // You can't change your own role.
           actions = '<td class="muted">—</td>';
+        } else if (role === "super_admin") {
+          // Demote a peer super admin back to admin. (The founder is rejected
+          // server-side, so this is safe even if the button is shown.)
+          actions = '<td><button class="row-act" data-email="' + esc(u.email) + '" data-to="admin">Demote</button></td>';
         } else if (role === "admin") {
-          actions = '<td><button class="row-act" data-email="' + esc(u.email) + '" data-to="customer">Revoke</button></td>';
+          actions =
+            '<td>' +
+            '<button class="row-act" data-email="' + esc(u.email) + '" data-to="super_admin">Make super</button> ' +
+            '<button class="row-act" data-email="' + esc(u.email) + '" data-to="customer">Revoke</button>' +
+            '</td>';
         } else {
           actions = '<td><button class="row-act" data-email="' + esc(u.email) + '" data-to="admin">Make admin</button></td>';
         }
@@ -551,6 +561,10 @@
       if (!btn || btn.disabled) return;
       var email = btn.getAttribute("data-email");
       var to = btn.getAttribute("data-to");
+      if (to === "super_admin" &&
+          !window.confirm("Make " + email + " a SUPER ADMIN?\n\nThey will be able to view revenue and promote or remove other admins. Continue?")) {
+        return;
+      }
       btn.disabled = true; btn.textContent = "…";
       applyRole(email, to)
         .then(function () { loadStats(); loadUsers($("user-search").value.trim()); })
@@ -568,6 +582,10 @@
       msg.textContent = "";
       var email = $("mg-email").value.trim();
       var role = $("mg-role").value;
+      if (role === "super_admin" &&
+          !window.confirm("Make " + email + " a SUPER ADMIN?\n\nThey will be able to view revenue and promote or remove other admins. Continue?")) {
+        return;
+      }
       btn.disabled = true; btn.textContent = "Applying…";
       applyRole(email, role)
         .then(function (json) {
