@@ -26,6 +26,7 @@
         <div class="bx-store__row"><strong>Address</strong><span id="addr"></span></div>
         <div class="bx-store__row"><strong>Hours</strong><span id="hours"></span></div>
         <div class="bx-store__row"><strong>Phone</strong><a id="phone" href="#"></a></div>
+        <div class="bx-store__row"><strong>Email</strong><a id="email" href="#"></a></div>
         <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
           <a class="bx-btn" href="menu.html">Order for pickup</a>
           <a class="bx-btn bx-btn--ghost" href="#map">View map</a>
@@ -57,6 +58,9 @@
   var ph = document.getElementById("phone");
   ph.textContent = s.phoneDisplay || "";
   ph.href = "tel:" + (s.phoneHref || "");
+  var em = document.getElementById("email");
+  if (s.email) { em.textContent = s.email; em.href = "mailto:" + s.email; }
+  else { em.closest(".bx-store__row").style.display = "none"; }
 })();
 </script>
 </body>

@@ -189,7 +189,11 @@
     burger: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>',
     close: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     person: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
-    bag: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>'
+    bag: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
+    instagram: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>',
+    facebook: '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M14 9h3V6h-3a3 3 0 0 0-3 3v2H9v3h2v6h3v-6h2.5l.5-3H14V9.5a.5.5 0 0 1 .5-.5z"/></svg>',
+    x: '<svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true"><path d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.5 4.7H5.7l11 14.5z"/></svg>',
+    tiktok: '<svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true"><path d="M16.5 3c.3 2.1 1.6 3.6 3.5 3.9v3c-1.4 0-2.7-.4-3.8-1.1v6.1a5.9 5.9 0 1 1-5.9-5.9c.3 0 .6 0 .9.1v3.1a2.9 2.9 0 1 0 2 2.7V3h3.3z"/></svg>'
   };
 
   B.renderChrome = function (active) {
@@ -262,6 +266,25 @@
         '</aside>' +
       '</div>';
 
+    /* ---- Social icon row (only platforms with a URL set) ---- */
+    var social = store.social || {};
+    var SOCIAL_LINKS = [
+      { key: "instagram", label: "Instagram", url: social.instagram },
+      { key: "x", label: "X", url: social.x },
+      { key: "tiktok", label: "TikTok", url: social.tiktok },
+      { key: "facebook", label: "Facebook", url: social.facebook }
+    ].filter(function (s) { return s.url && ICON[s.key]; });
+    var socialRow = SOCIAL_LINKS.length
+      ? '<div class="bx-footer__social">' +
+          '<span class="bx-footer__social-label">Follow us</span>' +
+          '<div class="bx-footer__social-links">' +
+            SOCIAL_LINKS.map(function (s) {
+              return '<a class="bx-social" href="' + s.url + '" target="_blank" rel="noopener noreferrer" aria-label="' + s.label + '" title="' + s.label + '">' + ICON[s.key] + '</a>';
+            }).join('') +
+          '</div>' +
+        '</div>'
+      : '';
+
     var footer =
       '<footer class="bx-footer">' +
         '<div class="bx-footer__inner">' +
@@ -286,6 +309,7 @@
             '<a href="' + pagePath("store.html") + '">Store &amp; Hours</a>' +
             '<a href="' + pagePath("store.html#contact") + '">Contact</a>' +
             '<a href="tel:' + (store.phoneHref || '') + '">' + (store.phoneDisplay || '') + '</a>' +
+            (store.email ? '<a href="mailto:' + store.email + '">' + store.email + '</a>' : '') +
           '</div>' +
           '<div>' +
             '<h3>' + (store.name || 'illy Caffè') + '</h3>' +
@@ -293,7 +317,8 @@
             '<span style="display:block;font-size:14px;color:#3d2b1f">' + (store.hours || '') + '</span>' +
           '</div>' +
         '</div>' +
-        '<div class="bx-footer__legal">© illy Caffè — National Harbor branch. Online payments and POS order submission are handled by Toast.</div>' +
+        socialRow +
+        '<div class="bx-footer__legal">© illy Caffè — National Harbor branch. Online ordering and POS submission are handled by Toast.</div>' +
       '</footer>';
 
     var host = document.querySelector("[data-chrome-header]");

@@ -8,8 +8,17 @@ window.ILLY_BRANCH.store = {
   addressLines: ["138 Waterfront Street", "Oxon Hill, MD 20745"],
   phoneDisplay: "+1 (301) 500-1077",
   phoneHref: "+13015001077",
+  email: "info@illynationalharbor.com",
   hours: "Tue–Thu 8 AM–5:30 PM · Fri–Sun 8 AM–6:30 PM · Mon closed",
-  toastOrderUrl: "https://order.toasttab.com/online/illy-caffe-oxon-hill"
+  toastOrderUrl: "https://order.toasttab.com/online/illy-caffe-oxon-hill",
+
+  /* Social profiles shown in the footer. */
+  social: {
+    instagram: "https://www.instagram.com/illy_nationalharbor",
+    x: "https://x.com/illynharbor?s=11",
+    tiktok: "https://www.tiktok.com/@illynationalharbor?_r=1&_t=ZT-98MOxBlE5bZ",
+    facebook: "https://www.facebook.com/share/1Hz15Stgh7/?mibextid=wwXIfr"
+  }
 };
 
 // Image base (relative to /pages/, so prefixed with ../)
