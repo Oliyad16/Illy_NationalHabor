@@ -64,6 +64,7 @@
   catsRoot.innerHTML = cats.map(function (c) {
     return '<section class="mn-cat" id="cat-' + c.id + '">' +
       '<h2>' + c.name + '</h2><div class="mn-cat__rule"></div>' +
+      (c.note ? '<p class="mn-cat__note">' + c.note + '</p>' : '') +
       UI.itemsGridHTML(c.items) +
     '</section>';
   }).join('');

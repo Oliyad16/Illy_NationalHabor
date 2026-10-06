@@ -16,3 +16,4 @@ skills-lock.json
 
 # Throwaway local probe/debug scripts (underscore-prefixed)
 scripts/_*.mjs
+.env*

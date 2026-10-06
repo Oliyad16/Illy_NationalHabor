@@ -9,7 +9,7 @@ window.ILLY_BRANCH.store = {
   phoneDisplay: "+1 (301) 500-1077",
   phoneHref: "+13015001077",
   email: "info@illynationalharbor.com",
-  hours: "Tue–Thu 8 AM–5:30 PM · Fri–Sun 8 AM–6:30 PM · Mon closed",
+  hours: "Mon–Thu 6:30 AM–3 PM · Fri–Sun 6:30 AM–4 PM",
   toastOrderUrl: "https://order.toasttab.com/online/illy-caffe-oxon-hill",
 
   /* Social profiles shown in the footer. */
